@@ -14,34 +14,27 @@ A branded web application for House of Emirates (HOE) to mint NFT collectibles r
 - **State Management**: React hooks + URL state (nuqs)
 - **Deployment**: Vercel/Netlify
 
+## User Flow
+1. **User visits site** → Landing page with HOE branding
+2. **Click connect button** → RainbowKit wallet modal opens
+3. **User connects wallet** → Wallet connection established
+4. **Redirect to mint page** → NFT minting interface
+5. **Enter NFT details** → Image upload, metadata form, recipient
+6. **Click mint** → Transaction initiated
+7. **Show progress modal** → Transaction hash and status
+8. **Success message** → NFT minted successfully
+
 ## Page Structure
 
-### 1. **Landing Page** (`/`)
-**Purpose**: Brand introduction, wallet connection, and entry point
+### **Single Page Application** (`/`)
+**Purpose**: Complete user journey from landing to minting
 **Components**:
 - Hero section with HOE branding
 - Wallet connection interface (RainbowKit)
 - Network selection (Ethereum Mainnet / Polygon Amoy Testnet)
 - Role verification (admin/minter check)
-- Feature highlights (NFT minting, secure, audited)
-- Quick start guide
-- Footer with links
-
-### 2. **Admin Dashboard** (`/admin`)
-**Purpose**: Administrative functions and overview
-**Components**:
-- Role management interface
-- Minter role assignment/revocation
-- Contract statistics
-- System health monitoring
-
-### 3. **Minting Interface** (`/mint`)
-**Purpose**: Core NFT minting functionality
-**Components**:
-- Image upload (drag & drop + file picker) via Pinata
-- Metadata form (OpenSea standards compliant)
-- Recipient wallet input
-- Minting transaction interface
+- NFT minting form (conditional rendering)
+- Transaction progress modal
 - Success/error feedback
 
 ## Implementation Tasks
@@ -55,14 +48,14 @@ A branded web application for House of Emirates (HOE) to mint NFT collectibles r
 - Git repository setup
 - Environment variables configuration
 
-### **Task 2: Basic Layout & Navigation**
+### **Task 2: Basic Layout & Single Page Structure**
 **Dependencies**: Task 1
 **Deliverables**:
 - `Layout.tsx` - Page wrapper with providers
 - `Header.tsx` - Navigation and branding
 - `Footer.tsx` - Links and branding
-- Basic routing setup (/, /admin, /mint)
-- Responsive navigation structure
+- Single page structure with conditional rendering
+- Responsive layout
 
 ### **Task 3: RainbowKit Integration**
 **Dependencies**: Task 1, Task 2
@@ -72,7 +65,7 @@ A branded web application for House of Emirates (HOE) to mint NFT collectibles r
 - `WalletStatus.tsx` - Connection status display
 - `NetworkSelector.tsx` - Network switching
 - Multi-chain support (Mainnet + Amoy Testnet)
-- Wallet connection in homepage
+- Wallet connection flow
 
 ### **Task 4: Pinata IPFS Integration**
 **Dependencies**: Task 3
@@ -130,54 +123,35 @@ A branded web application for House of Emirates (HOE) to mint NFT collectibles r
 - Error handling and user feedback
 - Success confirmation
 
-### **Task 10: Role Verification & Access Control**
-**Dependencies**: Task 8
+### **Task 10: Transaction Progress Modal**
+**Dependencies**: Task 9
 **Deliverables**:
-- `RoleVerifier.tsx` - Admin/minter role checking
-- Role-based component rendering
-- Route protection for admin functions
-- Access control validation
-- Unauthorized access handling
+- `TransactionProgressModal.tsx` - Progress tracking
+- Transaction hash display
+- Status indicators (pending, confirmed, failed)
+- Network explorer links
+- User feedback and guidance
 
-### **Task 11: Admin Panel Components**
+### **Task 11: Success/Error Handling**
 **Dependencies**: Task 10
 **Deliverables**:
-- `AdminPanel.tsx` - Main admin interface
-- `RoleManager.tsx` - Role assignment interface
-- `ContractStats.tsx` - Contract statistics display
-- Admin-only route protection
-- Responsive admin layout
+- `SuccessModal.tsx` - Success confirmation
+- `ErrorModal.tsx` - Error display and recovery
+- Transaction result handling
+- User guidance for next steps
+- Error recovery options
 
-### **Task 12: Role Management Functions**
-**Dependencies**: Task 11
-**Deliverables**:
-- Grant minter role functionality
-- Revoke minter role functionality
-- Role assignment interface
-- Role verification display
-- Transaction handling for role changes
-
-### **Task 13: Contract Statistics & Monitoring**
-**Dependencies**: Task 11
-**Deliverables**:
-- Total NFTs minted counter
-- Contract balance display
-- Recent transactions list
-- Network status monitoring
-- System health indicators
-
-### **Task 14: Testing & Bug Fixes**
+### **Task 12: Testing & Bug Fixes**
 **Dependencies**: All previous tasks
 **Deliverables**:
 - Component functionality testing
 - Integration testing
 - Wallet connection testing
 - Minting flow testing
-- Admin function testing
 - Bug fixes and improvements
 
-### **Task 15: Performance Optimization**
-**Dependencies**: Task 14
+### **Task 13: Performance Optimization**
+**Dependencies**: Task 12
 **Deliverables**:
 - Image optimization
 - Code splitting implementation
@@ -185,8 +159,8 @@ A branded web application for House of Emirates (HOE) to mint NFT collectibles r
 - Performance monitoring setup
 - Bundle size optimization
 
-### **Task 16: Deployment Preparation**
-**Dependencies**: Task 15
+### **Task 14: Deployment Preparation**
+**Dependencies**: Task 13
 **Deliverables**:
 - Production build optimization
 - Environment configuration
@@ -199,10 +173,9 @@ A branded web application for House of Emirates (HOE) to mint NFT collectibles r
 ### **Core Components** (`/src/components/core/`)
 
 #### **Layout Components**
-- `Header.tsx` - Navigation and wallet connection
+- `Header.tsx` - Navigation and branding
 - `Footer.tsx` - Links and branding
 - `Layout.tsx` - Page wrapper with providers
-- `Sidebar.tsx` - Admin navigation (if applicable)
 
 #### **Wallet Components**
 - `RainbowKitProvider.tsx` - RainbowKit configuration and providers
@@ -228,7 +201,7 @@ A branded web application for House of Emirates (HOE) to mint NFT collectibles r
 - `Button.tsx` - Styled buttons (Shadcn)
 - `Input.tsx` - Form inputs (Shadcn)
 - `Card.tsx` - Content containers (Shadcn)
-- `Modal.tsx` - Overlay dialogs (Shadcn)
+- `Dialog.tsx` - Overlay dialogs (Shadcn)
 - `Loading.tsx` - Loading states
 - `ErrorBoundary.tsx` - Error handling
 
@@ -236,13 +209,9 @@ A branded web application for House of Emirates (HOE) to mint NFT collectibles r
 
 #### **Minting Feature**
 - `MintingWizard.tsx` - Step-by-step minting process
-- `MintingProgress.tsx` - Transaction progress indicator
-- `MintingSuccess.tsx` - Success confirmation
-
-#### **Admin Feature**
-- `RoleManager.tsx` - Role assignment interface
-- `ContractStats.tsx` - Contract statistics display
-- `AdminPanel.tsx` - Administrative controls
+- `TransactionProgressModal.tsx` - Transaction progress indicator
+- `SuccessModal.tsx` - Success confirmation
+- `ErrorModal.tsx` - Error handling
 
 ### **Utility Components** (`/src/components/utils/`)
 
@@ -393,7 +362,6 @@ const updateAttribute = (index: number, field: keyof Attribute, value: string | 
 
 ### **Access Control**
 - Role-based component rendering
-- Route protection for admin functions
 - Contract interaction validation
 - Network-specific access control
 
@@ -447,7 +415,6 @@ const updateAttribute = (index: number, field: keyof Attribute, value: string | 
 ### **Integration Tests**
 - Wallet connection flows
 - Minting processes
-- Admin functions
 - Pinata integration
 
 ### **E2E Tests**

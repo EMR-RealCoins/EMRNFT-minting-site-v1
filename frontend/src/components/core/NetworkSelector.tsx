@@ -1,124 +1,86 @@
 'use client';
 
-import React from 'react';
-import { useChainId, useSwitchChain } from 'wagmi';
+import { useAccount, useSwitchChain } from 'wagmi';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BaseComponentProps } from '@/types';
-import { NETWORKS } from '@/lib/constants';
+import { Badge } from '@/components/ui/badge';
 
-interface NetworkSelectorProps extends BaseComponentProps {}
-
-export function NetworkSelector({ className = '' }: NetworkSelectorProps) {
-  const chainId = useChainId();
+export default function NetworkSelector() {
+  const { isConnected } = useAccount();
   const { switchChain, isPending } = useSwitchChain();
 
-  // Get network info from chainId
-  const getNetworkInfo = (id: number) => {
-    if (id === NETWORKS.mainnet.id) return NETWORKS.mainnet;
-    if (id === NETWORKS.amoy.id) return NETWORKS.amoy;
-    return { name: 'Unknown Network', currency: 'Unknown', currencySymbol: 'Unknown' };
-  };
-
-  const isCorrectNetwork = chainId === NETWORKS.mainnet.id || chainId === NETWORKS.amoy.id;
+  if (!isConnected) {
+    return null;
+  }
 
   const handleSwitchToMainnet = () => {
-    if (switchChain) {
-      switchChain({ chainId: NETWORKS.mainnet.id });
-    }
+    switchChain({ chainId: 1 });
   };
 
   const handleSwitchToAmoy = () => {
-    if (switchChain) {
-      switchChain({ chainId: NETWORKS.amoy.id });
-    }
+    switchChain({ chainId: 80002 });
   };
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle className="text-lg">Network Selection</CardTitle>
-        <CardDescription>
-          Choose your preferred blockchain network
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Current Network Status */}
-        <div className="p-4 bg-gray-50 rounded-lg">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-600">Current Network:</span>
-            <div className="flex items-center space-x-2">
-              <div className={`w-2 h-2 rounded-full ${isCorrectNetwork ? 'bg-green-500' : 'bg-red-500'}`}></div>
-              <span className="text-sm font-medium">
-                {getNetworkInfo(chainId).name}
-              </span>
-            </div>
+    <div className="space-y-3">
+      <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        Select Network
+      </h3>
+      
+      <div className="grid grid-cols-2 gap-3">
+        <Button
+          onClick={handleSwitchToMainnet}
+          disabled={isPending}
+          variant="outline"
+          className="flex flex-col items-center gap-2 h-auto py-3"
+        >
+          <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
+            <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
           </div>
-          {!isCorrectNetwork && (
-            <p className="text-xs text-red-600 mt-2">
-              Please switch to a supported network
-            </p>
-          )}
-        </div>
-
-        {/* Network Options */}
-        <div className="grid grid-cols-1 gap-3">
-          <Button
-            variant={chainId === NETWORKS.mainnet.id ? "default" : "outline"}
-            onClick={handleSwitchToMainnet}
-            disabled={isPending || chainId === NETWORKS.mainnet.id}
-            className="justify-start"
-          >
-            <div className="flex items-center space-x-3 w-full">
-              <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center">
-                <span className="text-white text-xs font-bold">E</span>
-              </div>
-              <div className="text-left">
-                <div className="font-medium">Ethereum Mainnet</div>
-                <div className="text-xs text-gray-500">Production network</div>
-              </div>
-              {chainId === NETWORKS.mainnet.id && (
-                <div className="ml-auto">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                </div>
-              )}
-            </div>
-          </Button>
-
-          <Button
-            variant={chainId === NETWORKS.amoy.id ? "default" : "outline"}
-            onClick={handleSwitchToAmoy}
-            disabled={isPending || chainId === NETWORKS.amoy.id}
-            className="justify-start"
-          >
-            <div className="flex items-center space-x-3 w-full">
-              <div className="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center">
-                <span className="text-white text-xs font-bold">P</span>
-              </div>
-              <div className="text-left">
-                <div className="font-medium">Polygon Amoy Testnet</div>
-                <div className="text-xs text-gray-500">Testing network</div>
-              </div>
-              {chainId === NETWORKS.amoy.id && (
-                <div className="ml-auto">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                </div>
-              )}
-            </div>
-          </Button>
-        </div>
-
-        {/* Network Info */}
-        {chainId && (
-          <div className="p-3 bg-blue-50 rounded-lg">
-            <div className="text-xs text-blue-800">
-              <div className="font-medium">Network Details:</div>
-              <div>Chain ID: {chainId}</div>
-              <div>Currency: {getNetworkInfo(chainId).currencySymbol}</div>
-            </div>
+          <div className="text-center">
+            <div className="font-medium text-sm">Ethereum</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">Mainnet</div>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </Button>
+
+        <Button
+          onClick={handleSwitchToAmoy}
+          disabled={isPending}
+          variant="outline"
+          className="flex flex-col items-center gap-2 h-auto py-3"
+        >
+          <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center">
+            <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div className="text-center">
+            <div className="font-medium text-sm">Polygon</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">Amoy Testnet</div>
+          </div>
+        </Button>
+      </div>
+
+      {isPending && (
+        <div className="flex items-center justify-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+          <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          Switching network...
+        </div>
+      )}
+
+      <div className="text-xs text-slate-500 dark:text-slate-400 text-center">
+        <p>Choose your preferred network for minting NFTs</p>
+        <p className="mt-1">
+          <Badge variant="outline" className="text-xs">
+            Mainnet: Real transactions
+          </Badge>
+          {' '}
+          <Badge variant="outline" className="text-xs">
+            Testnet: Free testing
+          </Badge>
+        </p>
+      </div>
+    </div>
   );
 }

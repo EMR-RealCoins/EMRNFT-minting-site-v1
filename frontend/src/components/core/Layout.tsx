@@ -1,15 +1,22 @@
-import React from 'react';
-import { BaseComponentProps } from '@/types';
+'use client';
 
-interface LayoutProps extends BaseComponentProps {
-  children: React.ReactNode;
+import { ReactNode } from 'react';
+import Header from './Header';
+import Footer from './Footer';
+
+interface LayoutProps {
+  children: ReactNode;
 }
 
-export function Layout({ children, className = '' }: LayoutProps) {
+export default function Layout({ children }: LayoutProps) {
   return (
-    <div className={`min-h-screen bg-background ${className}`}>
-      <div className="flex min-h-screen flex-col">
-        <main className="flex-1">{children}</main>
+    <div className="min-h-screen bg-[#FFFCF7] text-[#0A1F44]">
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-1 container mx-auto px-4 py-8">
+          {children}
+        </main>
+        <Footer />
       </div>
     </div>
   );

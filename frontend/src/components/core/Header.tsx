@@ -1,49 +1,52 @@
-import React from 'react';
-import Link from 'next/link';
-import { WalletConnect } from './WalletConnect';
-import { BaseComponentProps } from '@/types';
+'use client';
 
-interface HeaderProps extends BaseComponentProps {}
+import WalletConnect from './WalletConnect';
+import { APP_CONFIG } from '@/lib/constants';
 
-export function Header({ className = '' }: HeaderProps) {
+export default function Header() {
   return (
-    <header className={`border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ${className}`}>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+    <header className="bg-[#0A1F44] text-white shadow-md sticky top-0 z-50">
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center justify-between">
           {/* Logo and Brand */}
-          <div className="flex items-center space-x-4">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">HOE</span>
-              </div>
-              <span className="text-xl font-bold text-foreground">House of Emirates</span>
-            </Link>
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-[#D4AF37] rounded-lg flex items-center justify-center">
+              <span className="text-[#0A1F44] font-bold text-lg">HOE</span>
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">
+                {APP_CONFIG.name}
+              </h1>
+              <p className="text-sm text-gray-300">
+                NFT Collectibles
+              </p>
+            </div>
           </div>
 
           {/* Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            <Link 
-              href="/" 
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            <a
+              href="#about"
+              className="text-gray-300 hover:text-[#D4AF37] transition-colors"
             >
-              Home
-            </Link>
-            <Link 
-              href="/mint" 
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              About
+            </a>
+            <a
+              href="#features"
+              className="text-gray-300 hover:text-[#D4AF37] transition-colors"
             >
-              Mint NFT
-            </Link>
-            <Link 
-              href="/admin" 
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              Features
+            </a>
+            <a
+              href="#contact"
+              className="text-gray-300 hover:text-[#D4AF37] transition-colors"
             >
-              Admin
-            </Link>
+              Contact
+            </a>
           </nav>
 
           {/* Wallet Connection */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             <WalletConnect />
           </div>
         </div>

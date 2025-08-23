@@ -1,44 +1,93 @@
 'use client';
 
-import React from 'react';
-import { RainbowKitProvider as RainbowKitProviderBase } from '@rainbow-me/rainbowkit';
+import { ReactNode } from 'react';
+import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
+import { mainnet, polygon } from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { http, createConfig as createWagmiConfig } from 'wagmi';
+import { injected, walletConnect, coinbaseWallet } from 'wagmi/connectors';
 import { WagmiProvider } from 'wagmi';
-import { mainnet, polygonAmoy } from 'wagmi/chains';
-import { getDefaultConfig } from '@rainbow-me/rainbowkit';
-import { BaseComponentProps } from '@/types';
 
-interface RainbowKitProviderProps extends BaseComponentProps {
-  children: React.ReactNode;
-}
-
-// Configure chains for the app
-const chains = [mainnet, polygonAmoy];
-
-// Set up wagmi config
-const config = getDefaultConfig({
-  appName: 'House of Emirates NFT',
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'YOUR_PROJECT_ID',
-  chains,
-  ssr: true,
+// Create wagmi config with proper WalletConnect configuration
+const config = createWagmiConfig({
+  chains: [
+    mainnet,
+    {
+      ...polygon,
+      id: 80002, // Polygon Amoy Testnet
+      name: 'Polygon Amoy Testnet',
+      network: 'polygon-amoy',
+      nativeCurrency: {
+        name: 'MATIC',
+        symbol: 'MATIC',
+        decimals: 18,
+      },
+      rpcUrls: {
+        default: {
+          http: ['https://rpc-amoy.polygon.technology'],
+        },
+        public: {
+          http: ['https://rpc-amoy.polygon.technology'],
+        },
+      },
+      blockExplorers: {
+        default: {
+          name: 'PolygonScan',
+          url: 'https://www.oklink.com/amoy',
+        },
+      },
+    },
+  ],
+  connectors: [
+    injected(),
+    walletConnect({ 
+      projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'YOUR_PROJECT_ID',
+      showQrModal: true,
+      metadata: {
+        name: 'House of Emirates NFT',
+        description: 'NFT Minting Interface',
+        url: 'https://houseofemirates.com',
+        icons: ['https://houseofemirates.com/icon.png']
+      }
+    }),
+    coinbaseWallet({ 
+      appName: 'House of Emirates NFT',
+      appLogoUrl: 'https://houseofemirates.com/logo.png'
+    }),
+  ],
+  transports: {
+    [mainnet.id]: http(),
+    [80002]: http('https://rpc-amoy.polygon.technology'),
+  },
+  ssr: false, // Disable SSR to prevent initialization issues
 });
 
-// Create a client
-const queryClient = new QueryClient();
+// Create React Query client with better error handling
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+    },
+  },
+});
 
-export function RainbowKitProvider({ children, className = '' }: RainbowKitProviderProps) {
+interface RainbowKitProviderProps {
+  children: ReactNode;
+}
+
+export default function RainbowKitProviderWrapper({ children }: RainbowKitProviderProps) {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProviderBase
-          chains={chains}
-          locale="en-US"
-          modalSize="wide"
+        <RainbowKitProvider
+          showRecentTransactions={true}
+          coolMode={true}
         >
-          <div className={className}>
-            {children}
-          </div>
-        </RainbowKitProviderBase>
+          {children}
+        </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );
