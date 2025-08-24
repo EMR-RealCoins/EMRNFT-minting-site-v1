@@ -1,86 +1,256 @@
 'use client';
 
-import { useAccount, useSwitchChain } from 'wagmi';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { useState } from 'react';
+import {
+  Box,
+  Button,
+  Typography,
+  Chip,
+  Stack,
+  Alert,
+  CircularProgress,
+} from '@mui/material';
+import { useWeb3 } from './Web3Provider';
+import { isMainnetMode, isTestnetMode } from '@/lib/env';
 
 export default function NetworkSelector() {
-  const { isConnected } = useAccount();
-  const { switchChain, isPending } = useSwitchChain();
+  const { 
+    currentChainId, 
+    isSupportedNetwork, 
+    switchToMainnet, 
+    switchToSepolia,
+    switchToTestnet,
+    getNetworkName,
+    getNetworkIcon,
+    isMainnet,
+    isSepolia,
+    isTestnet
+  } = useWeb3();
+  
+  const [isSwitching, setIsSwitching] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!isConnected) {
-    return null;
+  const handleNetworkSwitch = async (targetChainId: number) => {
+    if (targetChainId === currentChainId) return;
+    
+    setIsSwitching(true);
+    setError(null);
+    
+    try {
+      if (targetChainId === 1) {
+        await switchToMainnet();
+      } else if (targetChainId === 11155111) {
+        await switchToSepolia();
+      } else if (targetChainId === 80002) {
+        await switchToTestnet();
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to switch network');
+    } finally {
+      setIsSwitching(false);
+    }
+  };
+
+  if (!currentChainId) {
+    return (
+      <Alert severity="info">
+        Please connect your wallet to view network options
+      </Alert>
+    );
   }
 
-  const handleSwitchToMainnet = () => {
-    switchChain({ chainId: 1 });
-  };
-
-  const handleSwitchToAmoy = () => {
-    switchChain({ chainId: 80002 });
-  };
-
   return (
-    <div className="space-y-3">
-      <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300">
-        Select Network
-      </h3>
+    <Box>
+      <Typography variant="h6" fontWeight={600} color="#0A1F44" gutterBottom>
+        Network Selection
+      </Typography>
       
-      <div className="grid grid-cols-2 gap-3">
-        <Button
-          onClick={handleSwitchToMainnet}
-          disabled={isPending}
-          variant="outline"
-          className="flex flex-col items-center gap-2 h-auto py-3"
-        >
-          <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
-            <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-          <div className="text-center">
-            <div className="font-medium text-sm">Ethereum</div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">Mainnet</div>
-          </div>
-        </Button>
+      {/* Current Network Status */}
+      <Box sx={{ mb: 3 }}>
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Typography variant="subtitle2" color="text.secondary">
+            Current Network:
+          </Typography>
+          <Chip
+            label={`${getNetworkIcon(currentChainId)} ${getNetworkName(currentChainId)}`}
+            color={isSupportedNetwork ? 'success' : 'error'}
+            variant="outlined"
+            sx={{
+              borderColor: isSupportedNetwork ? '#4caf50' : '#f44336',
+              color: isSupportedNetwork ? '#4caf50' : '#f44336',
+            }}
+          />
+        </Stack>
+        
+        {!isSupportedNetwork && (
+          <Alert severity="warning" sx={{ mt: 2 }}>
+            {isMainnetMode() 
+              ? "You're on an unsupported network. Please switch to Ethereum Mainnet."
+              : "You're on an unsupported network. Please switch to Ethereum Mainnet, Sepolia Testnet, or Polygon Amoy Testnet."
+            }
+          </Alert>
+        )}
+      </Box>
 
-        <Button
-          onClick={handleSwitchToAmoy}
-          disabled={isPending}
-          variant="outline"
-          className="flex flex-col items-center gap-2 h-auto py-3"
+      {/* Network Options */}
+      <Stack spacing={2}>
+        {/* Ethereum Mainnet - Always visible */}
+        <Box
+          sx={{
+            p: 2,
+            border: '1px solid',
+            borderColor: isMainnet ? '#D4AF37' : 'divider',
+            borderRadius: 2,
+            bgcolor: isMainnet ? 'rgba(212, 175, 55, 0.05)' : 'background.paper',
+          }}
         >
-          <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center">
-            <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <div className="text-center">
-            <div className="font-medium text-sm">Polygon</div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">Amoy Testnet</div>
-          </div>
-        </Button>
-      </div>
+          <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Typography variant="h6" color="#0A1F44">
+                🔵 Ethereum Mainnet
+              </Typography>
+              <Chip
+                label="Production"
+                size="small"
+                color="primary"
+                variant="outlined"
+              />
+            </Stack>
+            
+            <Button
+              variant={isMainnet ? 'outlined' : 'contained'}
+              onClick={() => handleNetworkSwitch(1)}
+              disabled={isMainnet || isSwitching}
+              sx={{
+                borderColor: '#D4AF37',
+                color: isMainnet ? '#D4AF37' : 'white',
+                bgcolor: isMainnet ? 'transparent' : '#0A1F44',
+                '&:hover': {
+                  bgcolor: isMainnet ? 'rgba(212, 175, 55, 0.1)' : '#1a365d',
+                },
+              }}
+            >
+              {isMainnet ? 'Connected' : 'Switch to Mainnet'}
+            </Button>
+          </Stack>
+          
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Mint NFTs on the main Ethereum blockchain. Gas fees apply.
+          </Typography>
+        </Box>
 
-      {isPending && (
-        <div className="flex items-center justify-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-          <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          Switching network...
-        </div>
+        {/* Testnet Networks - Only visible in testnet mode */}
+        {isTestnetMode() && (
+          <>
+            {/* Sepolia Testnet */}
+            <Box
+              sx={{
+                p: 2,
+                border: '1px solid',
+                borderColor: isSepolia ? '#D4AF37' : 'divider',
+                borderRadius: 2,
+                bgcolor: isSepolia ? 'rgba(212, 175, 55, 0.05)' : 'background.paper',
+              }}
+            >
+              <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Typography variant="h6" color="#0A1F44">
+                    🟢 Sepolia Testnet
+                  </Typography>
+                  <Chip
+                    label="Testnet"
+                    size="small"
+                    color="secondary"
+                    variant="outlined"
+                  />
+                </Stack>
+                
+                <Button
+                  variant={isSepolia ? 'outlined' : 'contained'}
+                  onClick={() => handleNetworkSwitch(11155111)}
+                  disabled={isSepolia || isSwitching}
+                  sx={{
+                    borderColor: '#D4AF37',
+                    color: isSepolia ? '#D4AF37' : 'white',
+                    bgcolor: isSepolia ? 'transparent' : '#0A1F44',
+                    '&:hover': {
+                      bgcolor: isSepolia ? 'rgba(212, 175, 55, 0.1)' : '#1a365d',
+                    },
+                  }}
+                >
+                  {isSepolia ? 'Connected' : 'Switch to Sepolia'}
+                </Button>
+              </Stack>
+              
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Test your NFTs on Ethereum Sepolia testnet. Free test ETH available.
+              </Typography>
+            </Box>
+
+            {/* Polygon Amoy Testnet */}
+            <Box
+              sx={{
+                p: 2,
+                border: '1px solid',
+                borderColor: isTestnet ? '#D4AF37' : 'divider',
+                borderRadius: 2,
+                bgcolor: isTestnet ? 'rgba(212, 175, 55, 0.05)' : 'background.paper',
+              }}
+            >
+              <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Typography variant="h6" color="#0A1F44">
+                    🟣 Polygon Amoy Testnet
+                  </Typography>
+                  <Chip
+                    label="Testnet"
+                    size="small"
+                    color="secondary"
+                    variant="outlined"
+                  />
+                </Stack>
+                
+                <Button
+                  variant={isTestnet ? 'outlined' : 'contained'}
+                  onClick={() => handleNetworkSwitch(80002)}
+                  disabled={isTestnet || isSwitching}
+                  sx={{
+                    borderColor: '#D4AF37',
+                    color: isTestnet ? '#D4AF37' : 'white',
+                    bgcolor: isTestnet ? 'transparent' : '#0A1F44',
+                    '&:hover': {
+                      bgcolor: isTestnet ? 'rgba(212, 175, 55, 0.1)' : '#1a365d',
+                    },
+                  }}
+                >
+                  {isTestnet ? 'Connected' : 'Switch to Testnet'}
+                </Button>
+              </Stack>
+              
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Test your NFTs on Polygon Amoy testnet. Free test tokens available.
+              </Typography>
+            </Box>
+          </>
+        )}
+      </Stack>
+
+      {/* Loading State */}
+      {isSwitching && (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
+          <CircularProgress size={20} />
+          <Typography variant="body2" color="text.secondary">
+            Switching network...
+          </Typography>
+        </Box>
       )}
 
-      <div className="text-xs text-slate-500 dark:text-slate-400 text-center">
-        <p>Choose your preferred network for minting NFTs</p>
-        <p className="mt-1">
-          <Badge variant="outline" className="text-xs">
-            Mainnet: Real transactions
-          </Badge>
-          {' '}
-          <Badge variant="outline" className="text-xs">
-            Testnet: Free testing
-          </Badge>
-        </p>
-      </div>
-    </div>
+      {/* Error Display */}
+      {error && (
+        <Alert severity="error" sx={{ mt: 2 }}>
+          {error}
+        </Alert>
+      )}
+    </Box>
   );
 }

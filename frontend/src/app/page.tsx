@@ -2,226 +2,405 @@
 
 import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Box,
+  Container,
+  Typography,
+  Paper,
+  Stack,
+  Card,
+  CardContent,
+  CardHeader,
+  Avatar,
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+import {
+  Security as SecurityIcon,
+  Storage as StorageIcon,
+  ShoppingCart as ShoppingCartIcon,
+  CloudUpload as UploadIcon,
+  Description as DescriptionIcon,
+  AccountBalanceWallet as WalletIcon,
+  RocketLaunch as RocketIcon
+} from '@mui/icons-material';
 import WalletConnect from '@/components/core/WalletConnect';
-import WalletStatus from '@/components/core/WalletStatus';
 import NFTMintForm from '@/components/core/NFTMintForm';
+import ContractInfo from '@/components/core/ContractInfo';
+import { useContract } from '@/components/core/ContractProvider';
+import TransactionProgressModal from '@/components/core/TransactionProgressModal';
+import { useWeb3 } from '@/components/core/Web3Provider';
+import MobileNotSupported from '@/components/core/MobileNotSupported';
+
+// Custom styled components
+const HeroSection = styled(Box)(({ theme }) => ({
+  background: 'linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)',
+  padding: theme.spacing(8, 0),
+  textAlign: 'center',
+}));
+
+const FeatureCard = styled(Card)(({ theme }) => ({
+  background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+  border: '1px solid',
+  borderColor: theme.palette.divider,
+  borderRadius: theme.spacing(2),
+  boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04)',
+  transition: 'all 0.3s ease-in-out',
+  height: '100%',
+  '&:hover': {
+    transform: 'translateY(-4px)',
+    boxShadow: '0 8px 25px rgba(0, 0, 0, 0.12)',
+  },
+}));
+
+const StepCard = styled(Paper)(({ theme }) => ({
+  background: 'linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%)',
+  border: '2px solid #0A1F44',
+  borderRadius: theme.spacing(2),
+  padding: theme.spacing(3),
+  textAlign: 'center',
+  transition: 'all 0.3s ease-in-out',
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: '0 8px 20px rgba(10, 31, 68, 0.15)',
+  },
+}));
 
 // Landing section component
 const LandingSection = () => (
-  <section className="py-20 text-center">
-    <div className="max-w-4xl mx-auto">
+  <Box>
       {/* Hero Section */}
-      <div className="mb-16">
-        <h1 className="text-5xl md:text-6xl font-bold text-slate-900 dark:text-white mb-6">
-          House of Emirates
-          <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-            NFT Collectibles
-          </span>
-        </h1>
-        <p className="text-xl text-slate-600 dark:text-slate-400 mb-8 max-w-2xl mx-auto">
-          Transform your physical and historical coins into unique digital collectibles 
-          on the Ethereum blockchain with secure, audited smart contracts.
-        </p>
-        <div className="flex justify-center">
+    <HeroSection>
+      <Container maxWidth="lg">
+        <Typography 
+          variant="h2" 
+          component="h1" 
+          fontWeight="bold" 
+          color="#0A1F44" 
+          gutterBottom
+          sx={{ mb: 4 }}
+        >
+          House of Emirates NFT Coin Collectibles
+        </Typography>
+        <Typography 
+          variant="h5" 
+          color="text.secondary" 
+          sx={{ mb: 6, maxWidth: 800, mx: 'auto' }}
+        >
+          Transform your physical and historical coins into unique digital collectibles on the Ethereum blockchain
+        </Typography>
+        
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 6 }}>
           <WalletConnect />
-        </div>
-      </div>
+        </Box>
+        
+        <Typography 
+          variant="body1" 
+          color="text.secondary" 
+          sx={{ maxWidth: 600, mx: 'auto' }}
+        >
+          Connect your wallet to start minting your precious coin collection as NFTs
+        </Typography>
+      </Container>
+    </HeroSection>
 
-      {/* Features Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-        <Card className="border-0 shadow-lg bg-white/50 backdrop-blur-sm">
-          <CardHeader>
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-            </div>
-            <CardTitle className="text-slate-900 dark:text-white">Secure & Audited</CardTitle>
-          </CardHeader>
+    {/* Features Section */}
+    <Box sx={{ py: 8, bgcolor: 'background.default' }}>
+      <Container maxWidth="lg">
+        <Typography 
+          variant="h3" 
+          component="h2" 
+          fontWeight="bold" 
+          color="#0A1F44" 
+          textAlign="center"
+          gutterBottom
+          sx={{ mb: 6 }}
+        >
+          Why Choose House of Emirates?
+        </Typography>
+        
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 4 }}>
+          <FeatureCard>
+            <CardHeader
+              avatar={
+                <Avatar sx={{ bgcolor: '#0A1F44', color: 'white' }}>
+                  <SecurityIcon />
+                </Avatar>
+              }
+              title={
+                <Typography variant="h6" fontWeight={600} color="#0A1F44">
+                  Secure & Audited
+                </Typography>
+              }
+            />
           <CardContent>
-            <CardDescription className="text-slate-600 dark:text-slate-400">
+              <Typography variant="body2" color="text.secondary">
               Built with OpenZeppelin audited contracts and role-based access control for maximum security.
-            </CardDescription>
+              </Typography>
           </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-lg bg-white/50 backdrop-blur-sm">
-          <CardHeader>
-            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <CardTitle className="text-slate-900 dark:text-white">IPFS Storage</CardTitle>
-          </CardHeader>
+          </FeatureCard>
+          
+          <FeatureCard>
+            <CardHeader
+              avatar={
+                <Avatar sx={{ bgcolor: '#0A1F44', color: 'white' }}>
+                  <StorageIcon />
+                </Avatar>
+              }
+              title={
+                <Typography variant="h6" fontWeight={600} color="#0A1F44">
+                  IPFS Storage
+                </Typography>
+              }
+            />
           <CardContent>
-            <CardDescription className="text-slate-600 dark:text-slate-400">
+              <Typography variant="body2" color="text.secondary">
               Metadata stored on decentralized IPFS network ensuring long-term availability and immutability.
-            </CardDescription>
+              </Typography>
           </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-lg bg-white/50 backdrop-blur-sm">
-          <CardHeader>
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <CardTitle className="text-slate-900 dark:text-white">OpenSea Ready</CardTitle>
-          </CardHeader>
+          </FeatureCard>
+          
+          <FeatureCard>
+            <CardHeader
+              avatar={
+                <Avatar sx={{ bgcolor: '#0A1F44', color: 'white' }}>
+                  <ShoppingCartIcon />
+                </Avatar>
+              }
+              title={
+                <Typography variant="h6" fontWeight={600} color="#0A1F44">
+                  OpenSea Ready
+                </Typography>
+              }
+            />
           <CardContent>
-            <CardDescription className="text-slate-600 dark:text-slate-400">
+              <Typography variant="body2" color="text.secondary">
               Fully compliant with OpenSea metadata standards for seamless marketplace integration.
-            </CardDescription>
+              </Typography>
           </CardContent>
-        </Card>
-      </div>
+          </FeatureCard>
+        </Box>
+      </Container>
+    </Box>
 
-      {/* Quick Start Guide */}
-      <div className="bg-white/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-200 dark:bg-slate-800/50 dark:border-slate-700">
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
+    {/* How It Works Section */}
+    <Box sx={{ py: 8, bgcolor: 'background.paper' }}>
+      <Container maxWidth="lg">
+        <Typography 
+          variant="h3" 
+          component="h2" 
+          fontWeight="bold" 
+          color="#0A1F44" 
+          textAlign="center"
+          gutterBottom
+          sx={{ mb: 6 }}
+        >
           How It Works
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="text-center">
-            <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-3 font-bold">
-              1
-            </div>
-            <h3 className="font-semibold text-slate-900 dark:text-white mb-2">Connect Wallet</h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              Connect your MetaMask or other Web3 wallet
-            </p>
-          </div>
-          <div className="text-center">
-            <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-3 font-bold">
-              2
-            </div>
-            <h3 className="font-semibold text-slate-900 dark:text-white mb-2">Upload Image</h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              Upload your coin image to IPFS
-            </p>
-          </div>
-          <div className="text-center">
-            <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-3 font-bold">
-              3
-            </div>
-            <h3 className="font-semibold text-slate-900 dark:text-white mb-2">Add Metadata</h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              Add description and attributes
-            </p>
-          </div>
-          <div className="text-center">
-            <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-3 font-bold">
-              4
-            </div>
-            <h3 className="font-semibold text-slate-900 dark:text-white mb-2">Mint NFT</h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              Mint your NFT on Ethereum
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+        </Typography>
+        
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 4 }}>
+          {[
+            { icon: <WalletIcon />, title: 'Connect Wallet', desc: 'Connect your MetaMask or other Web3 wallet' },
+            { icon: <UploadIcon />, title: 'Upload Image', desc: 'Upload your coin image to IPFS' },
+            { icon: <DescriptionIcon />, title: 'Add Metadata', desc: 'Add description and attributes' },
+            { icon: <RocketIcon />, title: 'Mint NFT', desc: 'Mint your NFT on Ethereum' }
+          ].map((step, index) => (
+            <StepCard key={index}>
+              <Avatar
+                sx={{
+                  width: 60,
+                  height: 60,
+                  bgcolor: '#D4AF37',
+                  color: '#0A1F44',
+                  mx: 'auto',
+                  mb: 2,
+                  fontSize: '1.5rem',
+                }}
+              >
+                {step.icon}
+              </Avatar>
+              <Typography variant="h6" fontWeight={600} color="#0A1F44" gutterBottom>
+                {step.title}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {step.desc}
+              </Typography>
+            </StepCard>
+          ))}
+        </Box>
+      </Container>
+    </Box>
+  </Box>
 );
 
 // Minting section component
-const MintingSection = () => (
-  <section className="py-16 bg-gradient-to-b from-white to-gray-50">
-    <div className="container mx-auto px-4">
-      <div className="text-center mb-12">
-        <h2 className="text-4xl font-extrabold text-[#0A1F44] sm:text-5xl">
-          Mint Your NFT Collectible
-        </h2>
-        <p className="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
-          Follow the steps below to turn your physical and historical coins into unique digital collectibles on the Ethereum blockchain.
-        </p>
-      </div>
-      
-      <div className="max-w-5xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          {/* Side Panel: Wallet Status */}
-          <div className="lg:col-span-1 lg:sticky lg:top-28">
-            <Card className="border-gray-200 shadow-md bg-white/60 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-lg text-[#0A1F44] flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                  </svg>
-                  Wallet Status
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <WalletStatus />
-              </CardContent>
-            </Card>
-          </div>
+const MintingSection = ({ 
+  metadata, 
+  onMetadataChange 
+}: { 
+  metadata: {
+    name: string;
+    description: string;
+    external_url: string;
+    attributes: Array<{ trait_type: string; value: string }>;
+  }; 
+  onMetadataChange: (data: {
+    name: string;
+    description: string;
+    external_url: string;
+    attributes: Array<{ trait_type: string; value: string }>;
+  }) => void; 
+}) => {
+  const { mintNFT, isMinting, mintTransactionHash, mintTransactionStatus, mintError, resetMintTransaction } = useContract();
+  const { supportedNetworks, currentChainId } = useWeb3();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [shouldResetForm, setShouldResetForm] = useState(false);
 
-          {/* Main Panel: Minting Form */}
-          <div className="lg:col-span-2">
-            <Card className="border-gray-200 shadow-lg bg-white/80 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold text-[#0A1F44]">
-                  Create a New Collectible
-                </CardTitle>
-                <CardDescription className="text-gray-600">
-                  Fill in the details below to mint your NFT.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <NFTMintForm
-                  onMint={(data) => {
-                    console.log('Minting NFT with data:', data);
-                    alert('Minting functionality will be implemented in later tasks!');
-                  }}
-                  isLoading={false}
-                />
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-);
+  const handleMint = async (data: { recipient: string; metadataURI: string }) => {
+    setIsModalOpen(true);
+    await mintNFT(data.recipient, data.metadataURI);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    if (mintTransactionStatus === 'success') {
+      // Reset the form and go back to first step after successful transaction
+      onMetadataChange({
+        name: '',
+        description: '',
+        external_url: '',
+        attributes: []
+      });
+      setShouldResetForm(true);
+      resetMintTransaction();
+    } else if (mintTransactionStatus === 'error') {
+      resetMintTransaction();
+    }
+  };
+
+  // Reset the shouldResetForm flag after the form has been reset
+  useEffect(() => {
+    if (shouldResetForm) {
+      const timer = setTimeout(() => setShouldResetForm(false), 100);
+      return () => clearTimeout(timer);
+    }
+  }, [shouldResetForm]);
+
+  const getExplorerUrl = () => {
+    const network = Object.values(supportedNetworks).find(n => n.id === currentChainId);
+    // For hardhat local network, we don't have a block explorer
+    if (currentChainId === 31337) {
+      return undefined; // No explorer for local hardhat
+    }
+    return network?.blockExplorers?.default.url;
+  };
+
+  const getModalStatus = () => {
+    if (isMinting) return 'pending';
+    if (mintTransactionStatus === 'loading') return 'confirming';
+    return mintTransactionStatus;
+  };
+
+  return (
+    <Box sx={{ py: 6, bgcolor: 'background.default' }}>
+      <TransactionProgressModal
+        open={isModalOpen}
+        status={getModalStatus()}
+        transactionHash={mintTransactionHash}
+        errorMessage={mintError?.message}
+        onClose={handleCloseModal}
+        networkExplorerUrl={getExplorerUrl()}
+      />
+      <Container maxWidth="lg">
+        <Box sx={{ maxWidth: 1400, mx: 'auto' }}>
+          {/* Contract Information Panel */}
+          <Box sx={{ mb: 4 }}>
+            <ContractInfo />
+          </Box>
+          
+          {/* Main Panel: Minting Form - Full Width */}
+          <Box sx={{ width: '100%' }}>
+            <NFTMintForm
+              onMint={handleMint}
+              isLoading={isMinting || mintTransactionStatus === 'loading'}
+              metadata={metadata}
+              onMetadataChange={onMetadataChange}
+              resetForm={shouldResetForm}
+            />
+          </Box>
+        </Box>
+      </Container>
+    </Box>
+  );
+};
 
 export default function HomePage() {
   const [mounted, setMounted] = useState(false);
-  const [showMinting, setShowMinting] = useState(false);
+  const { isConnected, address } = useAccount();
+  const { hasMinterRole, isLoadingRole } = useContract();
+  const [metadata, setMetadata] = useState({
+    name: '',
+    description: '',
+    external_url: '',
+    attributes: [] as Array<{ trait_type: string; value: string }>,
+  });
 
   useEffect(() => {
-    // Add timeout to prevent hanging
-    const timeoutId = setTimeout(() => {
-      setMounted(true);
-    }, 100);
-
-    return () => clearTimeout(timeoutId);
+    setMounted(true);
   }, []);
 
-  // Use wagmi hooks only after mounting
-  const { isConnected, isConnecting } = useAccount();
-
-  // Automatically show minting form when wallet is connected
-  useEffect(() => {
-    if (mounted && isConnected && !isConnecting) {
-      setShowMinting(true);
-    } else {
-      setShowMinting(false);
-    }
-  }, [mounted, isConnected, isConnecting]);
-
-  // Show loading state during hydration
   if (!mounted) {
-    return <LandingSection />;
+    return null;
   }
 
-  // If wallet is connected, show minting form directly
-  if (isConnected && showMinting) {
-    return <MintingSection />;
+  // Show loading state while checking role
+  if (isConnected && isLoadingRole) {
+    return (
+      <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Container maxWidth="sm">
+          <Paper sx={{ p: 4, textAlign: 'center' }}>
+            <Typography variant="h6" color="#0A1F44" gutterBottom>
+              Checking Permissions...
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Verifying your minting permissions...
+            </Typography>
+          </Paper>
+        </Container>
+      </Box>
+    );
   }
 
-  // If wallet is not connected, show landing page
-  return <LandingSection />;
+  // Show error if connected but no minter role
+  if (isConnected && !hasMinterRole) {
+    return (
+      <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Container maxWidth="sm">
+          <Paper sx={{ p: 4, textAlign: 'center', border: '2px solid #f44336' }}>
+            <Typography variant="h5" color="#f44336" gutterBottom>
+              ⚠️ Access Denied
+            </Typography>
+            <Typography variant="h6" color="#0A1F44" gutterBottom>
+              Connected wallet does not have minting permission
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+              Your connected wallet address does not have the required MINTER_ROLE to create NFTs.
+              Please contact an administrator to grant you minting permissions, or connect a wallet that has the minter role.
+            </Typography>
+            <Box sx={{ mt: 3 }}>
+              <Typography variant="body2" fontFamily="monospace" color="text.secondary">
+                Current wallet: {address || 'Unknown'}
+              </Typography>
+            </Box>
+          </Paper>
+        </Container>
+      </Box>
+    );
+  }
+
+  return (
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+      <MobileNotSupported />
+      {!isConnected ? <LandingSection /> : <MintingSection metadata={metadata} onMetadataChange={setMetadata} />}
+    </Box>
+  );
 }

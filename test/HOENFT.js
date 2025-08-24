@@ -2,11 +2,11 @@ const { loadFixture } = require("@nomicfoundation/hardhat-toolbox/network-helper
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-describe("HOENFT (MyToken)", function () {
+describe("HOENFT (HouseOfEmiratesNFTs)", function () {
   async function deployHOENFTFixture() {
     const [admin, minter, user1, user2, user3] = await ethers.getSigners();
-    const MyToken = await ethers.getContractFactory("MyToken");
-    const contract = await MyToken.deploy(admin.address, minter.address);
+    const HouseOfEmiratesNFTs = await ethers.getContractFactory("HouseOfEmiratesNFTs");
+    const contract = await HouseOfEmiratesNFTs.deploy(admin.address, minter.address);
     return { contract, admin, minter, user1, user2, user3 };
   }
 
@@ -250,6 +250,181 @@ describe("HOENFT (MyToken)", function () {
       // User1 should no longer be able to mint
       await expect(contract.connect(user1).safeMint(user1.address, "ipfs://uri"))
         .to.be.revertedWithCustomError(contract, "AccessControlUnauthorizedAccount");
+    });
+  });
+
+  describe("Total Supply Functionality", function () {
+    it("Should return 0 total supply initially", async function () {
+      const { contract } = await loadFixture(deployHOENFTFixture);
+      expect(await contract.totalSupply()).to.equal(0);
+    });
+
+    it("Should increment total supply after minting", async function () {
+      const { contract, minter, user1 } = await loadFixture(deployHOENFTFixture);
+      
+      // Initially 0
+      expect(await contract.totalSupply()).to.equal(0);
+      
+      // After first mint
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri1");
+      expect(await contract.totalSupply()).to.equal(1);
+      
+      // After second mint
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri2");
+      expect(await contract.totalSupply()).to.equal(2);
+      
+      // After third mint
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri3");
+      expect(await contract.totalSupply()).to.equal(3);
+    });
+
+    it("Should maintain correct total supply after multiple mints to different users", async function () {
+      const { contract, minter, user1, user2, user3 } = await loadFixture(deployHOENFTFixture);
+      
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri1");
+      await contract.connect(minter).safeMint(user2.address, "ipfs://uri2");
+      await contract.connect(minter).safeMint(user3.address, "ipfs://uri3");
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri4");
+      
+      expect(await contract.totalSupply()).to.equal(4);
+    });
+
+    it("Should not decrease total supply after transfers", async function () {
+      const { contract, minter, user1, user2 } = await loadFixture(deployHOENFTFixture);
+      
+      // Mint 2 tokens
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri1");
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri2");
+      expect(await contract.totalSupply()).to.equal(2);
+      
+      // Transfer one token
+      await contract.connect(user1).transferFrom(user1.address, user2.address, 0);
+      
+      // Total supply should remain the same
+      expect(await contract.totalSupply()).to.equal(2);
+      expect(await contract.ownerOf(0)).to.equal(user2.address);
+      expect(await contract.ownerOf(1)).to.equal(user1.address);
+    });
+
+    it("Should not decrease total supply after burning", async function () {
+      const { contract, minter, user1 } = await loadFixture(deployHOENFTFixture);
+      
+      // Mint 3 tokens
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri1");
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri2");
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri3");
+      expect(await contract.totalSupply()).to.equal(3);
+      
+      // Burn one token
+      await contract.connect(user1).burn(1);
+      
+      // Total supply should remain the same (tracks minted, not existing tokens)
+      expect(await contract.totalSupply()).to.equal(3);
+      
+      // Token should be burned
+      await expect(contract.ownerOf(1)).to.be.revertedWithCustomError(contract, "ERC721NonexistentToken");
+      
+      // Other tokens should still exist
+      expect(await contract.ownerOf(0)).to.equal(user1.address);
+      expect(await contract.ownerOf(2)).to.equal(user1.address);
+    });
+
+    it("Should handle sequential token IDs correctly", async function () {
+      const { contract, minter, user1 } = await loadFixture(deployHOENFTFixture);
+      
+      // Mint tokens and verify IDs
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri1");
+      expect(await contract.totalSupply()).to.equal(1);
+      expect(await contract.ownerOf(0)).to.equal(user1.address);
+      
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri2");
+      expect(await contract.totalSupply()).to.equal(2);
+      expect(await contract.ownerOf(1)).to.equal(user1.address);
+      
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri3");
+      expect(await contract.totalSupply()).to.equal(3);
+      expect(await contract.ownerOf(2)).to.equal(user1.address);
+    });
+
+    it("Should maintain total supply consistency with safeMint return value", async function () {
+      const { contract, minter, user1 } = await loadFixture(deployHOENFTFixture);
+      
+      // Check that safeMint returns correct token ID
+      expect(await contract.connect(minter).safeMint.staticCall(user1.address, "ipfs://uri1")).to.equal(0);
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri1");
+      expect(await contract.totalSupply()).to.equal(1);
+      
+      expect(await contract.connect(minter).safeMint.staticCall(user1.address, "ipfs://uri2")).to.equal(1);
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri2");
+      expect(await contract.totalSupply()).to.equal(2);
+      
+      expect(await contract.connect(minter).safeMint.staticCall(user1.address, "ipfs://uri3")).to.equal(2);
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri3");
+      expect(await contract.totalSupply()).to.equal(3);
+    });
+
+    it("Should be callable by any address (view function)", async function () {
+      const { contract, minter, user1, user2, user3 } = await loadFixture(deployHOENFTFixture);
+      
+      // Mint some tokens
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri1");
+      await contract.connect(minter).safeMint(user2.address, "ipfs://uri2");
+      
+      // All users should be able to call totalSupply
+      expect(await contract.connect(user1).totalSupply()).to.equal(2);
+      expect(await contract.connect(user2).totalSupply()).to.equal(2);
+      expect(await contract.connect(user3).totalSupply()).to.equal(2);
+      expect(await contract.connect(minter).totalSupply()).to.equal(2);
+    });
+
+    it("Should handle edge case: mint, burn, mint again", async function () {
+      const { contract, minter, user1 } = await loadFixture(deployHOENFTFixture);
+      
+      // Mint token 0
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri1");
+      expect(await contract.totalSupply()).to.equal(1);
+      
+      // Burn token 0
+      await contract.connect(user1).burn(0);
+      expect(await contract.totalSupply()).to.equal(1);
+      
+      // Mint token 1 (next available ID)
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri2");
+      expect(await contract.totalSupply()).to.equal(2);
+      expect(await contract.ownerOf(1)).to.equal(user1.address);
+      
+      // Token 0 should still be burned
+      await expect(contract.ownerOf(0)).to.be.revertedWithCustomError(contract, "ERC721NonexistentToken");
+    });
+
+    it("Should maintain total supply accuracy in complex scenarios", async function () {
+      const { contract, minter, user1, user2, user3 } = await loadFixture(deployHOENFTFixture);
+      
+      // Complex scenario: mint, transfer, burn, mint more
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri1"); // ID 0
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri2"); // ID 1
+      await contract.connect(minter).safeMint(user2.address, "ipfs://uri3"); // ID 2
+      expect(await contract.totalSupply()).to.equal(3);
+      
+      // Transfer token 0 from user1 to user3
+      await contract.connect(user1).transferFrom(user1.address, user3.address, 0);
+      expect(await contract.totalSupply()).to.equal(3);
+      
+      // Burn token 1
+      await contract.connect(user1).burn(1);
+      expect(await contract.totalSupply()).to.equal(3);
+      
+      // Mint more tokens
+      await contract.connect(minter).safeMint(user2.address, "ipfs://uri4"); // ID 3
+      await contract.connect(minter).safeMint(user3.address, "ipfs://uri5"); // ID 4
+      expect(await contract.totalSupply()).to.equal(5);
+      
+      // Verify ownership
+      expect(await contract.ownerOf(0)).to.equal(user3.address);
+      await expect(contract.ownerOf(1)).to.be.revertedWithCustomError(contract, "ERC721NonexistentToken");
+      expect(await contract.ownerOf(2)).to.equal(user2.address);
+      expect(await contract.ownerOf(3)).to.equal(user2.address);
+      expect(await contract.ownerOf(4)).to.equal(user3.address);
     });
   });
 });

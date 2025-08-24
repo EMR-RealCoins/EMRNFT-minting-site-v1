@@ -1,33 +1,47 @@
 'use client';
 
-import React from 'react';
 import { useAccount, useChainId } from 'wagmi';
-import { Badge } from '@/components/ui/badge';
+import {
+  Box,
+  Typography,
+  Chip,
+  Stack,
+  Avatar,
+  Paper
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+import {
+  AccountBalanceWallet as WalletIcon,
+  CheckCircle as CheckIcon,
+  Warning as WarningIcon
+} from '@mui/icons-material';
+
+// Custom styled components
+const StatusCard = styled(Paper)(({ theme }) => ({
+  background: 'linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)',
+  border: '1px solid',
+  borderColor: theme.palette.divider,
+  borderRadius: theme.spacing(2),
+  padding: theme.spacing(2),
+  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+}));
+
+const NetworkChip = styled(Chip)(({ theme }) => ({
+  borderRadius: theme.spacing(3),
+  fontWeight: 600,
+  '&.connected': {
+    background: '#10b981',
+    color: 'white',
+  },
+  '&.disconnected': {
+    background: '#ef4444',
+    color: 'white',
+  },
+}));
 
 export default function WalletStatus() {
-  const { address, isConnected, isConnecting } = useAccount();
+  const { address, isConnected } = useAccount();
   const chainId = useChainId();
-
-  if (isConnecting) {
-    return (
-      <div className="flex items-center gap-2">
-        <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-        <span className="text-sm text-slate-600 dark:text-slate-400">
-          Connecting...
-        </span>
-      </div>
-    );
-  }
-
-  if (!isConnected) {
-    return (
-      <div className="text-center">
-        <p className="text-slate-600 dark:text-slate-400 mb-2">
-          Please connect your wallet to continue
-        </p>
-      </div>
-    );
-  }
 
   const getChainName = (id: number) => {
     switch (id) {
@@ -40,36 +54,100 @@ export default function WalletStatus() {
     }
   };
 
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-          Wallet Address:
-        </span>
-        <Badge variant="secondary" className="font-mono text-xs">
-          {address?.slice(0, 6)}...{address?.slice(-4)}
-        </Badge>
-      </div>
-      
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-          Network:
-        </span>
-        <Badge 
-          variant={chainId === 1 || chainId === 80002 ? "default" : "destructive"}
-          className="text-xs"
-        >
-          {getChainName(chainId)}
-        </Badge>
-      </div>
+  if (!isConnected || !address) {
+    return (
+      <StatusCard>
+        <Stack spacing={2} alignItems="center">
+          <Avatar
+            sx={{
+              bgcolor: '#ef4444',
+              color: 'white',
+              width: 48,
+              height: 48,
+            }}
+          >
+            <WarningIcon />
+          </Avatar>
+          <Typography variant="body2" color="text.secondary" textAlign="center">
+            Wallet not connected
+          </Typography>
+          <Typography variant="caption" color="text.secondary" textAlign="center">
+            Connect your wallet to start minting NFTs
+          </Typography>
+        </Stack>
+      </StatusCard>
+    );
+  }
 
-      {chainId !== 1 && chainId !== 80002 && (
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
-          <p className="text-sm text-yellow-800 dark:text-yellow-200">
-            ⚠️ Please switch to Ethereum Mainnet or Polygon Amoy Testnet to mint NFTs.
-          </p>
-        </div>
-      )}
-    </div>
+  const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+  const isSupportedNetwork = chainId === 1 || chainId === 80002;
+
+  return (
+    <StatusCard>
+      <Stack spacing={2}>
+        {/* Connection Status */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <CheckIcon sx={{ color: '#10b981', fontSize: 20 }} />
+          <Typography variant="body2" fontWeight={600} color="#10b981">
+            Connected
+          </Typography>
+        </Box>
+
+        {/* Wallet Address */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Avatar
+            sx={{
+              bgcolor: '#D4AF37',
+              color: '#0A1F44',
+              width: 32,
+              height: 32,
+            }}
+          >
+            <WalletIcon />
+          </Avatar>
+          <Box>
+            <Typography variant="caption" color="text.secondary">
+              Wallet Address
+            </Typography>
+            <Typography variant="body2" fontFamily="monospace" fontWeight={600}>
+              {shortAddress}
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Network Status */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <NetworkChip
+            label={getChainName(chainId)}
+            className={isSupportedNetwork ? 'connected' : 'disconnected'}
+            size="small"
+          />
+          <Typography variant="caption" color="text.secondary">
+            {isSupportedNetwork ? 'Network Supported' : 'Network Not Supported'}
+          </Typography>
+        </Box>
+
+        {/* Network Warning */}
+        {!isSupportedNetwork && (
+          <Box sx={{ 
+            p: 1.5, 
+            bgcolor: '#fef3c7', 
+            borderRadius: 1, 
+            border: '1px solid #f59e0b' 
+          }}>
+            <Typography variant="caption" color="#92400e" textAlign="center">
+              ⚠️ Please switch to Ethereum Mainnet or Polygon Amoy Testnet to mint NFTs.
+            </Typography>
+          </Box>
+        )}
+
+        {/* Additional Info */}
+        <Box sx={{ pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
+          <Typography variant="caption" color="text.secondary">
+            Ready to mint your NFT collectibles
+          </Typography>
+        </Box>
+      </Stack>
+    </StatusCard>
   );
 }

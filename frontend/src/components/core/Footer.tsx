@@ -1,123 +1,148 @@
 'use client';
 
-import { APP_CONFIG } from '@/lib/constants';
+import {
+  Box,
+  Container,
+  Typography,
+  Stack,
+  Link,
+  Divider,
+  IconButton
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+import {
+  Twitter as TwitterIcon,
+  LinkedIn as LinkedInIcon,
+  GitHub as GitHubIcon,
+  Email as EmailIcon
+} from '@mui/icons-material';
+
+// Custom styled components
+const StyledFooter = styled(Box)(({ theme }) => ({
+  background: 'linear-gradient(135deg, #0A1F44 0%, #1a365d 100%)',
+  color: 'white',
+  padding: theme.spacing(4, 0),
+  marginTop: 'auto',
+}));
+
+const FooterLink = styled(Link)(({ theme }) => ({
+  color: '#D4AF37',
+  textDecoration: 'none',
+  fontWeight: 500,
+  transition: 'all 0.3s ease-in-out',
+  '&:hover': {
+    color: '#C09B2D',
+    textDecoration: 'underline',
+  },
+}));
+
+const SocialIconButton = styled(IconButton)(({ theme }) => ({
+  color: '#D4AF37',
+  border: '2px solid #D4AF37',
+  borderRadius: theme.spacing(1),
+  transition: 'all 0.3s ease-in-out',
+  '&:hover': {
+    background: '#D4AF37',
+    color: '#0A1F44',
+    transform: 'translateY(-2px)',
+    boxShadow: '0 4px 15px rgba(212, 175, 55, 0.3)',
+  },
+}));
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0A1F44] text-white">
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand Section */}
-          <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-8 h-8 bg-[#D4AF37] rounded-lg flex items-center justify-center">
-                <span className="text-[#0A1F44] font-bold text-sm">HOE</span>
-              </div>
-              <div>
-                <h3 className="font-bold text-white">
-                  {APP_CONFIG.name}
-                </h3>
-                <p className="text-sm text-gray-300">
-                  {APP_CONFIG.description}
-                </p>
-              </div>
-            </div>
-            <p className="text-sm text-gray-300 max-w-md">
-              Transform your physical and historical coins into unique digital collectibles 
-              on the Ethereum blockchain with secure, audited smart contracts.
-            </p>
-          </div>
+    <StyledFooter>
+      <Container maxWidth="xl">
+        <Stack spacing={4}>
+          {/* Main Footer Content */}
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 4 }}>
+            {/* Company Info */}
+            <Box>
+              <Typography variant="h6" fontWeight={700} color="#D4AF37" gutterBottom>
+                House of Emirates
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)', mb: 2 }}>
+                Transforming physical and historical coins into unique digital collectibles on the Ethereum blockchain.
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+                Secure, audited smart contracts with role-based access control.
+              </Typography>
+            </Box>
 
-          {/* Quick Links */}
-          <div>
-            <h4 className="font-semibold text-white mb-4">
-              Quick Links
-            </h4>
-            <ul className="space-y-2">
-              <li>
-                <a
-                  href="#about"
-                  className="text-sm text-gray-300 hover:text-[#D4AF37] transition-colors"
-                >
+            {/* Quick Links */}
+            <Box>
+              <Typography variant="h6" fontWeight={700} color="#D4AF37" gutterBottom>
+                Quick Links
+              </Typography>
+              <Stack spacing={1}>
+                <FooterLink href="#home" variant="body2">
+                  Home
+                </FooterLink>
+                <FooterLink href="#about" variant="body2">
                   About
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#features"
-                  className="text-sm text-gray-300 hover:text-[#D4AF37] transition-colors"
-                >
+                </FooterLink>
+                <FooterLink href="#features" variant="body2">
                   Features
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#mint"
-                  className="text-sm text-gray-300 hover:text-[#D4AF37] transition-colors"
-                >
-                  Mint NFT
-                </a>
-              </li>
-            </ul>
-          </div>
+                </FooterLink>
+                <FooterLink href="#contact" variant="body2">
+                  Contact
+                </FooterLink>
+              </Stack>
+            </Box>
 
-          {/* Support */}
-          <div>
-            <h4 className="font-semibold text-white mb-4">
-              Support
-            </h4>
-            <ul className="space-y-2">
-              <li>
-                <a
-                  href="#contact"
-                  className="text-sm text-gray-300 hover:text-[#D4AF37] transition-colors"
-                >
-                  Contact Us
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#help"
-                  className="text-sm text-gray-300 hover:text-[#D4AF37] transition-colors"
-                >
-                  Help Center
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#docs"
-                  className="text-sm text-gray-300 hover:text-[#D4AF37] transition-colors"
-                >
-                  Documentation
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
+            {/* Contact & Social */}
+            <Box>
+              <Typography variant="h6" fontWeight={700} color="#D4AF37" gutterBottom>
+                Connect With Us
+              </Typography>
+              <Stack spacing={2}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <EmailIcon sx={{ color: '#D4AF37', fontSize: 20 }} />
+                  <FooterLink href="mailto:info@houseofemirates.com" variant="body2">
+                    info@houseofemirates.com
+                  </FooterLink>
+                </Box>
+                
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <SocialIconButton size="small">
+                    <TwitterIcon />
+                  </SocialIconButton>
+                  <SocialIconButton size="small">
+                    <LinkedInIcon />
+                  </SocialIconButton>
+                  <SocialIconButton size="small">
+                    <GitHubIcon />
+                  </SocialIconButton>
+                </Box>
+              </Stack>
+            </Box>
+          </Box>
 
-        {/* Bottom Bar */}
-        <div className="border-t border-gray-700 mt-8 pt-6">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-sm text-gray-400">
-              © 2024 {APP_CONFIG.name}. All rights reserved.
-            </p>
-            <div className="flex items-center space-x-4 mt-4 md:mt-0">
-              <a
-                href="#privacy"
-                className="text-sm text-gray-400 hover:text-[#D4AF37] transition-colors"
-              >
+          <Divider sx={{ borderColor: 'rgba(212, 175, 55, 0.3)' }} />
+
+          {/* Bottom Footer */}
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: { xs: 'column', sm: 'row' }, 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            gap: 2
+          }}>
+            <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+              © 2024 House of Emirates. All rights reserved.
+            </Typography>
+            
+            <Stack direction="row" spacing={3}>
+              <FooterLink href="#privacy" variant="body2">
                 Privacy Policy
-              </a>
-              <a
-                href="#terms"
-                className="text-sm text-gray-400 hover:text-[#D4AF37] transition-colors"
-              >
+              </FooterLink>
+              <FooterLink href="#terms" variant="body2">
                 Terms of Service
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </footer>
+              </FooterLink>
+            </Stack>
+          </Box>
+        </Stack>
+      </Container>
+    </StyledFooter>
   );
 }

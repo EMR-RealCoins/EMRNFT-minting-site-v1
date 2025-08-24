@@ -1,13 +1,79 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  Avatar,
+  Chip,
+  Stack,
+  Card,
+  CardContent,
+  CardHeader,
+  IconButton,
+  Alert
+} from '@mui/material';
+import {
+  CloudUpload as UploadIcon,
+  Image as ImageIcon,
+  Delete as DeleteIcon,
+  CheckCircle as CheckIcon
+} from '@mui/icons-material';
+import { styled } from '@mui/material/styles';
 
 interface ImageUploadProps {
   onImageSelect: (file: File) => void;
   selectedImage: File | null;
 }
+
+// Custom styled components
+const UploadArea = styled(Paper)(({ theme }) => ({
+  border: '2px dashed',
+  borderColor: theme.palette.divider,
+  borderRadius: theme.spacing(2),
+  padding: theme.spacing(4),
+  textAlign: 'center',
+  cursor: 'pointer',
+  transition: 'all 0.3s ease-in-out',
+  background: 'linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)',
+  '&:hover': {
+    borderColor: '#D4AF37',
+    background: 'linear-gradient(135deg, #fef7e0 0%, #f8fafc 100%)',
+    transform: 'translateY(-2px)',
+    boxShadow: '0 8px 25px rgba(212, 175, 55, 0.15)',
+  },
+  '&.drag-active': {
+    borderColor: '#D4AF37',
+    background: 'linear-gradient(135deg, #fef7e0 0%, #f8fafc 100%)',
+    boxShadow: '0 8px 25px rgba(212, 175, 55, 0.2)',
+  },
+}));
+
+const ImagePreviewCard = styled(Card)(({ theme }) => ({
+  background: 'linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%)',
+  border: '2px solid #10b981',
+  borderRadius: theme.spacing(2),
+  overflow: 'hidden',
+  transition: 'all 0.3s ease-in-out',
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: '0 8px 25px rgba(16, 185, 129, 0.2)',
+  },
+}));
+
+const StyledButton = styled(Button)(({ theme }) => ({
+  borderRadius: theme.spacing(1.5),
+  textTransform: 'none',
+  fontWeight: 600,
+  padding: theme.spacing(1, 2),
+  transition: 'all 0.3s ease-in-out',
+  '&:hover': {
+    transform: 'translateY(-1px)',
+    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.15)',
+  },
+}));
 
 export default function ImageUpload({ onImageSelect, selectedImage }: ImageUploadProps) {
   const [dragActive, setDragActive] = useState(false);
@@ -77,81 +143,121 @@ export default function ImageUpload({ onImageSelect, selectedImage }: ImageUploa
   };
 
   return (
-    <div className="space-y-4">
-      <label className="block text-sm font-medium text-gray-700">
-        Coin Image *
-      </label>
-      
+    <Box sx={{ width: '100%' }}>
       {previewUrl ? (
-        <Card className="border-2 border-dashed border-green-400 bg-green-50">
-          <CardContent className="p-4">
-            <div className="text-center space-y-3">
-              <div className="relative inline-block">
-                <img
-                  src={previewUrl}
-                  alt="Preview"
-                  className="w-full h-auto max-h-64 object-contain rounded-lg shadow-md"
+        <ImagePreviewCard>
+          <CardHeader
+            avatar={
+              <Avatar sx={{ bgcolor: '#10b981', color: 'white' }}>
+                <CheckIcon />
+              </Avatar>
+            }
+            title={
+              <Typography variant="h6" fontWeight={600} color="#065f46">
+                Image Selected Successfully
+              </Typography>
+            }
+            subheader={`${selectedImage?.name} (${selectedImage && (selectedImage.size / 1024 / 1024).toFixed(2)} MB)`}
+            action={
+              <IconButton onClick={removeImage} color="error" size="large">
+                <DeleteIcon />
+              </IconButton>
+            }
+          />
+          <CardContent>
+            <Box sx={{ textAlign: 'center' }}>
+              <Box
+                component="img"
+                src={previewUrl}
+                alt="Preview"
+                sx={{
+                  maxWidth: '100%',
+                  maxHeight: 200,
+                  borderRadius: 2,
+                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+                  objectFit: 'contain',
+                }}
+              />
+              <Stack direction="row" spacing={1} justifyContent="center" sx={{ mt: 2 }}>
+                <Chip
+                  icon={<CheckIcon />}
+                  label="Valid Image"
+                  color="success"
+                  variant="outlined"
                 />
-              </div>
-              <div>
-                <p className="text-sm text-green-800 font-semibold">
-                  {selectedImage?.name}
-                </p>
-                <p className="text-xs text-green-700">
-                  ({selectedImage && (selectedImage.size / 1024 / 1024).toFixed(2)} MB)
-                </p>
-              </div>
-              <Button
-                onClick={removeImage}
-                variant="destructive"
-                size="sm"
-                className="mt-2"
-              >
-                Remove Image
-              </Button>
-            </div>
+                <Chip
+                  label={`${selectedImage && (selectedImage.size / 1024 / 1024).toFixed(2)} MB`}
+                  color="primary"
+                  variant="outlined"
+                />
+              </Stack>
+            </Box>
           </CardContent>
-        </Card>
+        </ImagePreviewCard>
       ) : (
-        <Card
-          className={`border-2 border-dashed transition-all duration-300 cursor-pointer group ${
-            dragActive
-              ? 'border-[#D4AF37] bg-[#D4AF37]/10 ring-2 ring-[#D4AF37]'
-              : 'border-gray-300 hover:border-[#0A1F44]'
-          }`}
+        <UploadArea
+          className={dragActive ? 'drag-active' : ''}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
           onDrop={handleDrop}
           onClick={onButtonClick}
         >
-          <CardContent className="p-6">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-gray-100 group-hover:bg-[#D4AF37]/20 rounded-full flex items-center justify-center mx-auto transition-all duration-300">
-                <svg className="w-8 h-8 text-gray-400 group-hover:text-[#0A1F44] transition-all duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-gray-600 mb-1">
-                  <span className="font-semibold text-[#0A1F44]">Click to upload</span> or drag and drop
-                </p>
-                <p className="text-sm text-gray-500">
-                  PNG, JPG, JPEG, WebP (max 10MB)
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          <Stack spacing={3} alignItems="center">
+            <Avatar
+              sx={{
+                width: 80,
+                height: 80,
+                bgcolor: dragActive ? '#D4AF37' : 'grey.100',
+                color: dragActive ? '#0A1F44' : 'grey.600',
+                transition: 'all 0.3s ease-in-out',
+              }}
+            >
+              <UploadIcon sx={{ fontSize: 40 }} />
+            </Avatar>
+            
+            <Box>
+              <Typography variant="h6" fontWeight={600} color="#0A1F44" gutterBottom>
+                {dragActive ? 'Drop your image here' : 'Click to upload or drag and drop'}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                PNG, JPG, JPEG, WebP (max 10MB)
+              </Typography>
+            </Box>
+
+            <StyledButton
+              variant="outlined"
+              startIcon={<ImageIcon />}
+              sx={{
+                borderColor: '#0A1F44',
+                color: '#0A1F44',
+                '&:hover': {
+                  bgcolor: '#0A1F44',
+                  color: 'white',
+                }
+              }}
+            >
+              Choose Image
+            </StyledButton>
+          </Stack>
+        </UploadArea>
       )}
 
       <input
         ref={inputRef}
         type="file"
-        className="hidden"
+        style={{ display: 'none' }}
         accept="image/*"
         onChange={handleChange}
       />
-    </div>
+
+      {!selectedImage && (
+        <Alert severity="info" sx={{ mt: 2 }}>
+          <Typography variant="body2">
+            <strong>Tip:</strong> Use high-quality images (minimum 500x500 pixels) for the best NFT presentation.
+          </Typography>
+        </Alert>
+      )}
+    </Box>
   );
 }

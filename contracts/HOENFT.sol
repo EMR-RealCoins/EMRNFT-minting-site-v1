@@ -7,7 +7,7 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC721Burnable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import {ERC721URIStorage} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
-contract MyToken is ERC721, ERC721URIStorage, ERC721Burnable, AccessControl {
+contract HouseOfEmiratesNFTs is ERC721, ERC721URIStorage, ERC721Burnable, AccessControl {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     uint256 private _nextTokenId;
 
@@ -30,6 +30,10 @@ contract MyToken is ERC721, ERC721URIStorage, ERC721Burnable, AccessControl {
     function updateTokenURI(uint256 tokenId, string memory newUri) public onlyRole(MINTER_ROLE) {
         require(bytes(newUri).length > 0, "Token URI cannot be empty");
         _setTokenURI(tokenId, newUri);
+    }
+
+    function totalSupply() public view returns (uint256) {
+        return _nextTokenId;
     }
 
     // The following functions are overrides required by Solidity.

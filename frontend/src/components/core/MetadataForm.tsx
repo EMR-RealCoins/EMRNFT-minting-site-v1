@@ -1,32 +1,79 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import {
+  TextField,
+  Button,
+  Typography,
+  Card,
+  CardContent,
+  CardHeader,
+  Stack,
+  Paper,
+  Avatar,
+  Alert,
+  IconButton
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Description as DescriptionIcon,
+  Category as CategoryIcon,
+  Link as LinkIcon
+} from '@mui/icons-material';
+import { styled } from '@mui/material/styles';
+import React from 'react'; // Added missing import for React.useEffect
 
 interface Attribute {
   trait_type: string;
   value: string;
-  display_type?: string;
 }
 
 interface MetadataFormProps {
   metadata: {
     name: string;
     description: string;
+    external_url: string;
     attributes: Attribute[];
   };
   onMetadataChange: (metadata: {
     name: string;
     description: string;
+    external_url: string;
     attributes: Attribute[];
   }) => void;
 }
 
+// Custom styled components
+const StyledCard = styled(Card)(({ theme }) => ({
+  background: 'linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)',
+  border: `1px solid ${theme.palette.divider}`,
+  borderRadius: theme.spacing(2),
+  boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04)',
+  transition: 'all 0.3s ease-in-out',
+  '&:hover': {
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+    transform: 'translateY(-1px)',
+  },
+}));
+
+const AttributeRow = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2),
+  border: `1px solid ${theme.palette.divider}`,
+  borderRadius: theme.spacing(1.5),
+  background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+  transition: 'all 0.2s ease-in-out',
+  '&:hover': {
+    borderColor: '#D4AF37',
+    boxShadow: '0 2px 8px rgba(212, 175, 55, 0.1)',
+  },
+}));
+
 export default function MetadataForm({ metadata, onMetadataChange }: MetadataFormProps) {
-  const [newAttribute, setNewAttribute] = useState({ trait_type: '', value: '', display_type: '' });
+  const [newAttribute, setNewAttribute] = useState({ trait_type: '', value: '' });
+  
+  const [attributeErrors, setAttributeErrors] = useState<{[key: number]: {trait_type?: boolean, value?: boolean}}>({});
+  const [newAttributeErrors, setNewAttributeErrors] = useState<{trait_type?: boolean, value?: boolean}>({});
 
   const handleInputChange = (field: string, value: string) => {
     onMetadataChange({
@@ -36,11 +83,13 @@ export default function MetadataForm({ metadata, onMetadataChange }: MetadataFor
   };
 
   const addAttribute = () => {
-    if (newAttribute.trait_type && newAttribute.value) {
+    const errors = validateAttribute(newAttribute.trait_type, newAttribute.value);
+    setNewAttributeErrors(errors);
+    
+    if (!errors.trait_type && !errors.value) {
       const attribute: Attribute = {
-        trait_type: newAttribute.trait_type,
-        value: newAttribute.value,
-        ...(newAttribute.display_type && { display_type: newAttribute.display_type }),
+        trait_type: newAttribute.trait_type.trim(),
+        value: newAttribute.value.trim(),
       };
       
       onMetadataChange({
@@ -48,7 +97,8 @@ export default function MetadataForm({ metadata, onMetadataChange }: MetadataFor
         attributes: [...metadata.attributes, attribute],
       });
       
-      setNewAttribute({ trait_type: '', value: '', display_type: '' });
+      setNewAttribute({ trait_type: '', value: '' });
+      setNewAttributeErrors({});
     }
   };
 
@@ -60,184 +110,220 @@ export default function MetadataForm({ metadata, onMetadataChange }: MetadataFor
     });
   };
 
-  const addCommonAttribute = (trait_type: string, value: string) => {
-    const attribute: Attribute = { trait_type, value };
+  const validateAttribute = (trait_type: string, value: string) => {
+    return {
+      trait_type: !trait_type.trim(),
+      value: !value.trim(),
+    };
+  };
+
+  const updateAttribute = (index: number, field: 'trait_type' | 'value', value: string) => {
+    const newAttributes = [...metadata.attributes];
+    newAttributes[index] = { ...newAttributes[index], [field]: value };
+    
+    // Validate the updated attribute
+    const errors = validateAttribute(newAttributes[index].trait_type, newAttributes[index].value);
+    setAttributeErrors(prev => ({
+      ...prev,
+      [index]: errors
+    }));
+    
     onMetadataChange({
       ...metadata,
-      attributes: [...metadata.attributes, attribute],
+      attributes: newAttributes,
     });
   };
 
-  const commonAttributes = [
-    { trait_type: 'Year', placeholder: 'e.g., 1923' },
-    { trait_type: 'Mint Mark', placeholder: 'e.g., D, S, P' },
-    { trait_type: 'Condition', placeholder: 'e.g., Fine, Very Fine, Uncirculated' },
-    { trait_type: 'Rarity', placeholder: 'e.g., Common, Scarce, Rare' },
-    { trait_type: 'Material', placeholder: 'e.g., Silver, Gold, Bronze' },
-    { trait_type: 'Weight', placeholder: 'e.g., 26.73g' },
-    { trait_type: 'Diameter', placeholder: 'e.g., 38.1mm' },
-  ];
+  // Initialize default attributes if none exist
+  React.useEffect(() => {
+    if (metadata.attributes.length === 0) {
+      const defaultAttributes: Attribute[] = [
+        { trait_type: 'Empire', value: '' },
+        { trait_type: 'Emperor', value: '' },
+        { trait_type: 'Metal', value: '' },
+        { trait_type: 'Diameter', value: '' },
+        { trait_type: 'Weight', value: '' },
+      ];
+      onMetadataChange({
+        ...metadata,
+        attributes: defaultAttributes,
+      });
+    }
+  }, []);
 
   return (
-    <div className="space-y-8">
+    <Stack spacing={4}>
       {/* Basic Information */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-[#0A1F44] border-b pb-2">Step 1: Basic Information</h3>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            NFT Name *
-          </label>
-          <Input
-            type="text"
-            placeholder="e.g., 1923 Peace Silver Dollar"
-            value={metadata.name}
-            onChange={(e) => handleInputChange('name', e.target.value)}
-            className="w-full border-gray-300 focus:border-[#D4AF37] focus:ring-[#D4AF37]"
-          />
-        </div>
+      <StyledCard>
+        <CardHeader
+          avatar={
+            <Avatar sx={{ bgcolor: '#D4AF37', color: 'white' }}>
+              <DescriptionIcon />
+            </Avatar>
+          }
+          title={
+            <Typography variant="h6" fontWeight={600} color="#0A1F44">
+              Basic Information
+            </Typography>
+          }
+          subheader="Provide the essential details for your NFT"
+        />
+        <CardContent>
+          <Stack spacing={3}>
+            <TextField
+              fullWidth
+              label="NFT Name *"
+              placeholder="e.g., 1923 Peace Silver Dollar"
+              value={metadata.name}
+              onChange={(e) => handleInputChange('name', e.target.value)}
+              variant="outlined"
+              required
+              helperText="Choose a descriptive name for your coin"
+            />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Description *
-          </label>
-          <textarea
-            placeholder="Describe this coin's history, significance, and unique characteristics..."
-            value={metadata.description}
-            onChange={(e) => handleInputChange('description', e.target.value)}
-            rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#D4AF37] resize-vertical"
-          />
-        </div>
-      </div>
+            <TextField
+              fullWidth
+              label="Description *"
+              placeholder="Describe this coin's history, significance, and unique characteristics..."
+              value={metadata.description}
+              onChange={(e) => handleInputChange('description', e.target.value)}
+              variant="outlined"
+              multiline
+              rows={4}
+              required
+              helperText="Provide a detailed description of your coin"
+            />
+
+            <TextField
+              fullWidth
+              label="External URL"
+              placeholder="https://example.com/coin-details"
+              value={metadata.external_url}
+              onChange={(e) => handleInputChange('external_url', e.target.value)}
+              variant="outlined"
+              helperText="Optional link to more information about this coin"
+              InputProps={{
+                startAdornment: <LinkIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+              }}
+            />
+          </Stack>
+        </CardContent>
+      </StyledCard>
 
       {/* Attributes */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-[#0A1F44] border-b pb-2">Step 2: Attributes</h3>
-        
-        {/* Common Coin Attributes */}
-        <Card className="border-gray-200 bg-gray-50/50">
-          <CardHeader>
-            <CardTitle className="text-md text-[#0A1F44]">
-              Common Coin Attributes
-            </CardTitle>
-            <p className="text-sm text-gray-600">
-              Quickly add common attributes for your coin.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {commonAttributes.map((attr) => (
-                <div key={attr.trait_type} className="flex items-center space-x-2">
-                  <Input
-                    placeholder={attr.placeholder}
-                    className="flex-1 border-gray-300 focus:border-[#D4AF37] focus:ring-[#D4AF37]"
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter' && e.currentTarget.value) {
-                        addCommonAttribute(attr.trait_type, e.currentTarget.value);
-                        e.currentTarget.value = '';
-                      }
-                    }}
+      <StyledCard>
+        <CardHeader
+          avatar={
+            <Avatar sx={{ bgcolor: '#D4AF37', color: 'white' }}>
+              <CategoryIcon />
+            </Avatar>
+          }
+          title={
+            <Typography variant="h6" fontWeight={600} color="#0A1F44">
+              Attributes
+            </Typography>
+          }
+          subheader="Add coin attributes and characteristics"
+        />
+        <CardContent>
+          <Stack spacing={2}>
+            {/* Existing Attributes */}
+            {metadata.attributes.map((attribute, index) => (
+              <AttributeRow key={index}>
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <TextField
+                    label="Attribute Name"
+                    value={attribute.trait_type}
+                    onChange={(e) => updateAttribute(index, 'trait_type', e.target.value)}
+                    size="small"
+                    sx={{ minWidth: 150 }}
+                    error={attributeErrors[index]?.trait_type}
+                    helperText={attributeErrors[index]?.trait_type ? 'Attribute name cannot be empty' : ''}
                   />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      const input = document.querySelector(`input[placeholder="${attr.placeholder}"]`) as HTMLInputElement;
-                      if (input?.value) {
-                        addCommonAttribute(attr.trait_type, input.value);
-                        input.value = '';
+                  <TextField
+                    label="Value"
+                    value={attribute.value}
+                    onChange={(e) => updateAttribute(index, 'value', e.target.value)}
+                    size="small"
+                    fullWidth
+                    placeholder="Enter value..."
+                    error={attributeErrors[index]?.value}
+                    helperText={attributeErrors[index]?.value ? 'Value cannot be empty' : ''}
+                  />
+                  <IconButton
+                    onClick={() => removeAttribute(index)}
+                    color="error"
+                    size="small"
+                    sx={{
+                      bgcolor: 'error.light',
+                      color: 'white',
+                      '&:hover': {
+                        bgcolor: 'error.main',
                       }
                     }}
-                    className="border-[#0A1F44] text-[#0A1F44] hover:bg-[#0A1F44] hover:text-white"
                   >
-                    Add
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                    <DeleteIcon />
+                  </IconButton>
+                </Stack>
+              </AttributeRow>
+            ))}
 
-        {/* Custom Attributes */}
-        <Card className="border-gray-200">
-          <CardHeader>
-            <CardTitle className="text-md text-[#0A1F44]">
-              Custom Attributes
-            </CardTitle>
-            <p className="text-sm text-gray-600">
-              Add unlimited custom attributes for your NFT.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-              <Input
-                placeholder="Attribute name"
-                value={newAttribute.trait_type}
-                onChange={(e) => setNewAttribute({ ...newAttribute, trait_type: e.target.value })}
-                className="border-gray-300 focus:border-[#D4AF37] focus:ring-[#D4AF37]"
-              />
-              <Input
-                placeholder="Value"
-                value={newAttribute.value}
-                onChange={(e) => setNewAttribute({ ...newAttribute, value: e.target.value })}
-                className="border-gray-300 focus:border-[#D4AF37] focus:ring-[#D4AF37]"
-              />
-              <select
-                value={newAttribute.display_type}
-                onChange={(e) => setNewAttribute({ ...newAttribute, display_type: e.target.value })}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#D4AF37] bg-white"
-              >
-                <option value="">Text</option>
-                <option value="number">Number</option>
-                <option value="boost_number">Boost Number</option>
-                <option value="boost_percentage">Boost Percentage</option>
-                <option value="date">Date</option>
-              </select>
-              <Button
-                onClick={addAttribute}
-                disabled={!newAttribute.trait_type || !newAttribute.value}
-                className="w-full bg-[#0A1F44] text-white hover:bg-opacity-90"
-              >
-                Add Attribute
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            {/* Add New Attribute */}
+            <AttributeRow>
+              <Stack direction="row" spacing={2} alignItems="center">
+                <TextField
+                  label="Attribute Name"
+                  placeholder="e.g., Historical Period"
+                  value={newAttribute.trait_type}
+                  onChange={(e) => {
+                    setNewAttribute({ ...newAttribute, trait_type: e.target.value });
+                    if (newAttributeErrors.trait_type && e.target.value.trim()) {
+                      setNewAttributeErrors(prev => ({ ...prev, trait_type: false }));
+                    }
+                  }}
+                  size="small"
+                  sx={{ minWidth: 150 }}
+                  error={newAttributeErrors.trait_type}
+                  helperText={newAttributeErrors.trait_type ? 'Attribute name cannot be empty' : ''}
+                />
+                <TextField
+                  label="Value"
+                  placeholder="e.g., Art Deco Era"
+                  value={newAttribute.value}
+                  onChange={(e) => {
+                    setNewAttribute({ ...newAttribute, value: e.target.value });
+                    if (newAttributeErrors.value && e.target.value.trim()) {
+                      setNewAttributeErrors(prev => ({ ...prev, value: false }));
+                    }
+                  }}
+                  size="small"
+                  fullWidth
+                  error={newAttributeErrors.value}
+                  helperText={newAttributeErrors.value ? 'Value cannot be empty' : ''}
+                />
+                <Button
+                  variant="contained"
+                  onClick={addAttribute}
+                  disabled={!newAttribute.trait_type.trim() || !newAttribute.value.trim()}
+                  startIcon={<AddIcon />}
+                  sx={{
+                    bgcolor: '#0A1F44',
+                    '&:hover': { bgcolor: '#0A1F44', opacity: 0.9 },
+                  }}
+                >
+                  Add
+                </Button>
+              </Stack>
+            </AttributeRow>
+          </Stack>
+        </CardContent>
+      </StyledCard>
 
-        {/* Current Attributes */}
-        {metadata.attributes.length > 0 && (
-          <Card className="border-gray-200">
-            <CardHeader>
-              <CardTitle className="text-md text-[#0A1F44]">
-                Current Attributes ({metadata.attributes.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {metadata.attributes.map((attribute, index) => (
-                  <Badge
-                    key={index}
-                    variant="secondary"
-                    className="flex items-center gap-2 py-1 px-3 bg-[#D4AF37]/10 text-[#0A1F44] border border-[#D4AF37]/50 rounded-full"
-                  >
-                    <span className="font-semibold">{attribute.trait_type}:</span>
-                    <span>{attribute.value}</span>
-                    {attribute.display_type && (
-                      <span className="text-xs opacity-75">({attribute.display_type})</span>
-                    )}
-                    <button
-                      onClick={() => removeAttribute(index)}
-                      className="ml-1 text-[#0A1F44] hover:text-red-500 focus:outline-none"
-                    >
-                      &times;
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    </div>
+      {metadata.attributes.length === 0 && (
+        <Alert severity="info" icon={<CategoryIcon />}>
+          No attributes added yet. Add some attributes to make your NFT more valuable and descriptive.
+        </Alert>
+      )}
+    </Stack>
   );
 }

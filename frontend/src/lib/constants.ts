@@ -8,6 +8,14 @@ export const NETWORKS = {
     currency: 'Ether',
     currencySymbol: 'ETH',
   },
+  sepolia: {
+    id: 11155111,
+    name: 'Sepolia Testnet',
+    rpcUrl: process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL || 'https://rpc.sepolia.org',
+    explorer: 'https://sepolia.etherscan.io',
+    currency: 'Ether',
+    currencySymbol: 'ETH',
+  },
   amoy: {
     id: 80002,
     name: 'Polygon Amoy Testnet',
@@ -21,6 +29,7 @@ export const NETWORKS = {
 // Contract Addresses
 export const CONTRACT_ADDRESSES = {
   mainnet: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_MAINNET || '',
+  sepolia: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_SEPOLIA || '0xf397340552D0A4630975850fE4007D5d7426AdE9',
   amoy: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_AMOY || '',
 } as const;
 

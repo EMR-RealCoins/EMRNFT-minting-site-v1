@@ -2,7 +2,8 @@
 
 import { ReactNode } from 'react';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
-import { mainnet, polygon } from 'wagmi/chains';
+import { mainnet, polygon, hardhat, sepolia } from 'wagmi/chains';
+import { isTestnetMode } from '@/lib/env';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { http, createConfig as createWagmiConfig } from 'wagmi';
 import { injected, walletConnect, coinbaseWallet } from 'wagmi/connectors';
@@ -11,32 +12,38 @@ import { WagmiProvider } from 'wagmi';
 // Create wagmi config with proper WalletConnect configuration
 const config = createWagmiConfig({
   chains: [
+    // Always include mainnet for reference
     mainnet,
-    {
-      ...polygon,
-      id: 80002, // Polygon Amoy Testnet
-      name: 'Polygon Amoy Testnet',
-      network: 'polygon-amoy',
-      nativeCurrency: {
-        name: 'MATIC',
-        symbol: 'MATIC',
-        decimals: 18,
-      },
-      rpcUrls: {
-        default: {
-          http: ['https://rpc-amoy.polygon.technology'],
+    // Conditionally include testnet chains based on environment
+    ...(isTestnetMode() ? [
+      sepolia,
+      {
+        ...polygon,
+        id: 80002, // Polygon Amoy Testnet
+        name: 'Polygon Amoy Testnet',
+        network: 'polygon-amoy',
+        nativeCurrency: {
+          name: 'MATIC',
+          symbol: 'MATIC',
+          decimals: 18,
         },
-        public: {
-          http: ['https://rpc-amoy.polygon.technology'],
+        rpcUrls: {
+          default: {
+            http: ['https://rpc-amoy.polygon.technology'],
+          },
+          public: {
+            http: ['https://rpc-amoy.polygon.technology'],
+          },
+        },
+        blockExplorers: {
+          default: {
+            name: 'PolygonScan',
+            url: 'https://www.oklink.com/amoy',
+          },
         },
       },
-      blockExplorers: {
-        default: {
-          name: 'PolygonScan',
-          url: 'https://www.oklink.com/amoy',
-        },
-      },
-    },
+      hardhat,
+    ] : []),
   ],
   connectors: [
     injected(),
@@ -57,7 +64,11 @@ const config = createWagmiConfig({
   ],
   transports: {
     [mainnet.id]: http(),
-    [80002]: http('https://rpc-amoy.polygon.technology'),
+    ...(isTestnetMode() ? {
+      [sepolia.id]: http(),
+      [80002]: http('https://rpc-amoy.polygon.technology'),
+      [hardhat.id]: http(),
+    } : {} as Record<number, ReturnType<typeof http>>),
   },
   ssr: false, // Disable SSR to prevent initialization issues
 });
