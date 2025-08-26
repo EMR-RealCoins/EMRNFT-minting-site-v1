@@ -15,3 +15,17 @@ node_modules
 
 # Hardhat Ignition default folder for deployments against a local node
 ignition/deployments/chain-31337
+
+# Development and planning files
+.cursorrules
+Plan/
+
+# Frontend build files
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# Environment files
+frontend/.env.local
+frontend/.env.production
+frontend/.env.development

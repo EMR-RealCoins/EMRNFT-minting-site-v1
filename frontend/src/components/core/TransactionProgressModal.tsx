@@ -149,8 +149,8 @@ export default function TransactionProgressModal({
   const [copiedHash, setCopiedHash] = useState(false);
   
   const handleModalClose = (_event: unknown, reason: 'backdropClick' | 'escapeKeyDown') => {
-    // Prevent closing while the transaction is in-flight.
-    if (status === 'pending' || status === 'confirming') {
+    // Prevent closing only while the transaction is being processed on the blockchain.
+    if (status === 'confirming') {
       return;
     }
     onClose();
@@ -223,25 +223,30 @@ export default function TransactionProgressModal({
           <>
             <CircularProgress size={50} sx={{ mb: 2 }} />
             <Typography variant="h6" fontWeight={600}>
-              Confirm in Wallet
+              {transactionHash ? 'Pending Confirmation' : 'Confirm in Wallet'}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Please confirm the transaction in your wallet to proceed with minting.
+              {transactionHash 
+                ? 'Transaction submitted, waiting for confirmation on the blockchain.'
+                : 'Please confirm the transaction in your wallet to proceed with minting.'
+              }
             </Typography>
-            {/* <Alert severity="info" sx={{ mt: 2, textAlign: 'left' }}>
-              <Typography variant="body2">
-                🎯 <strong>What to do next:</strong>
-              </Typography>
-              <Typography variant="body2" sx={{ mt: 1 }}>
-                • Check your wallet for a pending transaction
-                <br />
-                • Click &quot;Confirm&quot; to approve the transaction
-                <br />
-                • Click &quot;Reject&quot; if you want to cancel
-              </Typography>
-            </Alert> */}
             {transactionHash && (
-              <TransactionHashComponent hash={transactionHash} />
+              <>
+                <Alert severity="info" sx={{ mt: 2, textAlign: 'left' }}>
+                  <Typography variant="body2">
+                    🎯 <strong>Transaction Submitted:</strong>
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    • Your transaction has been submitted to the blockchain
+                    <br />
+                    • Waiting for network confirmation
+                    <br />
+                    • This may take a few minutes
+                  </Typography>
+                </Alert>
+                <TransactionHashComponent hash={transactionHash} />
+              </>
             )}
           </>
         );
@@ -362,13 +367,13 @@ export default function TransactionProgressModal({
         <IconButton
           aria-label="close"
           onClick={onClose}
-          disabled={status === 'pending' || status === 'confirming'}
+          disabled={status === 'confirming'}
           sx={{
             position: 'absolute',
             right: 8,
             top: 8,
             color: (theme) => theme.palette.grey[500],
-            opacity: (status === 'pending' || status === 'confirming') ? 0.3 : 1,
+            opacity: (status === 'confirming') ? 0.3 : 1,
           }}
         >
           <CloseIcon />
