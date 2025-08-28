@@ -9,7 +9,7 @@ import {ERC721URIStorage} from "@openzeppelin/contracts/token/ERC721/extensions/
 
 contract HouseOfEmiratesNFTs is ERC721, ERC721URIStorage, ERC721Burnable, AccessControl {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    uint256 private _nextTokenId;
+    uint256 private _nextTokenId = 1; // Start token IDs from 1
 
     constructor(address defaultAdmin, address minter) ERC721("House of Emirates NFTs", "EMR") {
         _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
@@ -33,7 +33,7 @@ contract HouseOfEmiratesNFTs is ERC721, ERC721URIStorage, ERC721Burnable, Access
     }
 
     function totalSupply() public view returns (uint256) {
-        return _nextTokenId;
+        return _nextTokenId - 1; // Since we start from 1, subtract 1 to get actual count
     }
 
     // The following functions are overrides required by Solidity.

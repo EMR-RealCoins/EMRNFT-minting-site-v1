@@ -24,9 +24,9 @@ describe("HOENFT (HouseOfEmiratesNFTs)", function () {
       const uri = "ipfs://test-uri-1";
       await expect(contract.connect(minter).safeMint(user1.address, uri))
         .to.emit(contract, "Transfer")
-        .withArgs(ethers.ZeroAddress, user1.address, 0);
-      expect(await contract.ownerOf(0)).to.equal(user1.address);
-      expect(await contract.tokenURI(0)).to.equal(uri);
+        .withArgs(ethers.ZeroAddress, user1.address, 1);
+      expect(await contract.ownerOf(1)).to.equal(user1.address);
+      expect(await contract.tokenURI(1)).to.equal(uri);
     });
     it("Should not allow non-minter to mint", async function () {
       const { contract, user1 } = await loadFixture(deployHOENFTFixture);
@@ -39,19 +39,19 @@ describe("HOENFT (HouseOfEmiratesNFTs)", function () {
     it("Should allow minter to update token URI", async function () {
       const { contract, minter, user1 } = await loadFixture(deployHOENFTFixture);
       await contract.connect(minter).safeMint(user1.address, "ipfs://old-uri");
-      await contract.connect(minter).updateTokenURI(0, "ipfs://new-uri");
-      expect(await contract.tokenURI(0)).to.equal("ipfs://new-uri");
+      await contract.connect(minter).updateTokenURI(1, "ipfs://new-uri");
+      expect(await contract.tokenURI(1)).to.equal("ipfs://new-uri");
     });
     it("Should not allow non-minter to update token URI", async function () {
       const { contract, minter, user1 } = await loadFixture(deployHOENFTFixture);
       await contract.connect(minter).safeMint(user1.address, "ipfs://old-uri");
-      await expect(contract.connect(user1).updateTokenURI(0, "ipfs://fail"))
+      await expect(contract.connect(user1).updateTokenURI(1, "ipfs://fail"))
         .to.be.revertedWithCustomError(contract, "AccessControlUnauthorizedAccount");
     });
     it("Should revert if new URI is empty", async function () {
       const { contract, minter, user1 } = await loadFixture(deployHOENFTFixture);
       await contract.connect(minter).safeMint(user1.address, "ipfs://old-uri");
-      await expect(contract.connect(minter).updateTokenURI(0, "")).to.be.revertedWith("Token URI cannot be empty");
+      await expect(contract.connect(minter).updateTokenURI(1, "")).to.be.revertedWith("Token URI cannot be empty");
     });
   });
 
@@ -59,8 +59,8 @@ describe("HOENFT (HouseOfEmiratesNFTs)", function () {
     it("Should allow owner to transfer NFT", async function () {
       const { contract, minter, user1, user2 } = await loadFixture(deployHOENFTFixture);
       await contract.connect(minter).safeMint(user1.address, "ipfs://uri");
-      await contract.connect(user1).transferFrom(user1.address, user2.address, 0);
-      expect(await contract.ownerOf(0)).to.equal(user2.address);
+      await contract.connect(user1).transferFrom(user1.address, user2.address, 1);
+      expect(await contract.ownerOf(1)).to.equal(user2.address);
     });
   });
 
@@ -68,15 +68,15 @@ describe("HOENFT (HouseOfEmiratesNFTs)", function () {
     it("Should allow owner to burn NFT", async function () {
       const { contract, minter, user1 } = await loadFixture(deployHOENFTFixture);
       await contract.connect(minter).safeMint(user1.address, "ipfs://uri");
-      await expect(contract.connect(user1).burn(0))
+      await expect(contract.connect(user1).burn(1))
         .to.emit(contract, "Transfer")
-        .withArgs(user1.address, ethers.ZeroAddress, 0);
-      await expect(contract.ownerOf(0)).to.be.revertedWithCustomError(contract, "ERC721NonexistentToken");
+        .withArgs(user1.address, ethers.ZeroAddress, 1);
+      await expect(contract.ownerOf(1)).to.be.revertedWithCustomError(contract, "ERC721NonexistentToken");
     });
     it("Should not allow non-owner to burn NFT", async function () {
       const { contract, minter, user1, user2 } = await loadFixture(deployHOENFTFixture);
       await contract.connect(minter).safeMint(user1.address, "ipfs://uri");
-      await expect(contract.connect(user2).burn(0)).to.be.reverted;
+      await expect(contract.connect(user2).burn(1)).to.be.reverted;
     });
   });
 
@@ -130,16 +130,16 @@ describe("HOENFT (HouseOfEmiratesNFTs)", function () {
     it("Should allow owner to approve specific address", async function () {
       const { contract, minter, user1, user2 } = await loadFixture(deployHOENFTFixture);
       await contract.connect(minter).safeMint(user1.address, "ipfs://uri");
-      await contract.connect(user1).approve(user2.address, 0);
-      expect(await contract.getApproved(0)).to.equal(user2.address);
+      await contract.connect(user1).approve(user2.address, 1);
+      expect(await contract.getApproved(1)).to.equal(user2.address);
     });
 
     it("Should allow approved address to transfer NFT", async function () {
       const { contract, minter, user1, user2, user3 } = await loadFixture(deployHOENFTFixture);
       await contract.connect(minter).safeMint(user1.address, "ipfs://uri");
-      await contract.connect(user1).approve(user2.address, 0);
-      await contract.connect(user2).transferFrom(user1.address, user3.address, 0);
-      expect(await contract.ownerOf(0)).to.equal(user3.address);
+      await contract.connect(user1).approve(user2.address, 1);
+      await contract.connect(user2).transferFrom(user1.address, user3.address, 1);
+      expect(await contract.ownerOf(1)).to.equal(user3.address);
     });
 
     it("Should allow owner to set approval for all", async function () {
@@ -153,23 +153,23 @@ describe("HOENFT (HouseOfEmiratesNFTs)", function () {
       const { contract, minter, user1, user2, user3 } = await loadFixture(deployHOENFTFixture);
       await contract.connect(minter).safeMint(user1.address, "ipfs://uri");
       await contract.connect(user1).setApprovalForAll(user2.address, true);
-      await contract.connect(user2).transferFrom(user1.address, user3.address, 0);
-      expect(await contract.ownerOf(0)).to.equal(user3.address);
+      await contract.connect(user2).transferFrom(user1.address, user3.address, 1);
+      expect(await contract.ownerOf(1)).to.equal(user3.address);
     });
 
     it("Should support safeTransferFrom", async function () {
       const { contract, minter, user1, user2 } = await loadFixture(deployHOENFTFixture);
       await contract.connect(minter).safeMint(user1.address, "ipfs://uri");
-      await contract.connect(user1).safeTransferFrom(user1.address, user2.address, 0);
-      expect(await contract.ownerOf(0)).to.equal(user2.address);
+      await contract.connect(user1).safeTransferFrom(user1.address, user2.address, 1);
+      expect(await contract.ownerOf(1)).to.equal(user2.address);
     });
 
     it("Should clear approval after transfer", async function () {
       const { contract, minter, user1, user2, user3 } = await loadFixture(deployHOENFTFixture);
       await contract.connect(minter).safeMint(user1.address, "ipfs://uri");
-      await contract.connect(user1).approve(user2.address, 0);
-      await contract.connect(user2).transferFrom(user1.address, user3.address, 0);
-      expect(await contract.getApproved(0)).to.equal(ethers.ZeroAddress);
+      await contract.connect(user1).approve(user2.address, 1);
+      await contract.connect(user2).transferFrom(user1.address, user3.address, 1);
+      expect(await contract.getApproved(1)).to.equal(ethers.ZeroAddress);
     });
   });
 
@@ -178,31 +178,31 @@ describe("HOENFT (HouseOfEmiratesNFTs)", function () {
       const { contract, minter, user1 } = await loadFixture(deployHOENFTFixture);
       await contract.connect(minter).safeMint(user1.address, "ipfs://uri1");
       await contract.connect(minter).safeMint(user1.address, "ipfs://uri2");
-      expect(await contract.ownerOf(0)).to.equal(user1.address);
       expect(await contract.ownerOf(1)).to.equal(user1.address);
+      expect(await contract.ownerOf(2)).to.equal(user1.address);
     });
 
     it("Should emit Transfer event on mint", async function () {
       const { contract, minter, user1 } = await loadFixture(deployHOENFTFixture);
       await expect(contract.connect(minter).safeMint(user1.address, "ipfs://uri"))
         .to.emit(contract, "Transfer")
-        .withArgs(ethers.ZeroAddress, user1.address, 0);
+        .withArgs(ethers.ZeroAddress, user1.address, 1);
     });
 
     it("Should emit Transfer event on transfer", async function () {
       const { contract, minter, user1, user2 } = await loadFixture(deployHOENFTFixture);
       await contract.connect(minter).safeMint(user1.address, "ipfs://uri");
-      await expect(contract.connect(user1).transferFrom(user1.address, user2.address, 0))
+      await expect(contract.connect(user1).transferFrom(user1.address, user2.address, 1))
         .to.emit(contract, "Transfer")
-        .withArgs(user1.address, user2.address, 0);
+        .withArgs(user1.address, user2.address, 1);
     });
 
     it("Should emit Approval event on approve", async function () {
       const { contract, minter, user1, user2 } = await loadFixture(deployHOENFTFixture);
       await contract.connect(minter).safeMint(user1.address, "ipfs://uri");
-      await expect(contract.connect(user1).approve(user2.address, 0))
+      await expect(contract.connect(user1).approve(user2.address, 1))
         .to.emit(contract, "Approval")
-        .withArgs(user1.address, user2.address, 0);
+        .withArgs(user1.address, user2.address, 1);
     });
 
     it("Should emit ApprovalForAll event on setApprovalForAll", async function () {
@@ -298,12 +298,12 @@ describe("HOENFT (HouseOfEmiratesNFTs)", function () {
       expect(await contract.totalSupply()).to.equal(2);
       
       // Transfer one token
-      await contract.connect(user1).transferFrom(user1.address, user2.address, 0);
+      await contract.connect(user1).transferFrom(user1.address, user2.address, 1);
       
       // Total supply should remain the same
       expect(await contract.totalSupply()).to.equal(2);
-      expect(await contract.ownerOf(0)).to.equal(user2.address);
-      expect(await contract.ownerOf(1)).to.equal(user1.address);
+      expect(await contract.ownerOf(1)).to.equal(user2.address);
+      expect(await contract.ownerOf(2)).to.equal(user1.address);
     });
 
     it("Should not decrease total supply after burning", async function () {
@@ -325,8 +325,8 @@ describe("HOENFT (HouseOfEmiratesNFTs)", function () {
       await expect(contract.ownerOf(1)).to.be.revertedWithCustomError(contract, "ERC721NonexistentToken");
       
       // Other tokens should still exist
-      expect(await contract.ownerOf(0)).to.equal(user1.address);
       expect(await contract.ownerOf(2)).to.equal(user1.address);
+      expect(await contract.ownerOf(3)).to.equal(user1.address);
     });
 
     it("Should handle sequential token IDs correctly", async function () {
@@ -335,30 +335,30 @@ describe("HOENFT (HouseOfEmiratesNFTs)", function () {
       // Mint tokens and verify IDs
       await contract.connect(minter).safeMint(user1.address, "ipfs://uri1");
       expect(await contract.totalSupply()).to.equal(1);
-      expect(await contract.ownerOf(0)).to.equal(user1.address);
+      expect(await contract.ownerOf(1)).to.equal(user1.address);
       
       await contract.connect(minter).safeMint(user1.address, "ipfs://uri2");
       expect(await contract.totalSupply()).to.equal(2);
-      expect(await contract.ownerOf(1)).to.equal(user1.address);
+      expect(await contract.ownerOf(2)).to.equal(user1.address);
       
       await contract.connect(minter).safeMint(user1.address, "ipfs://uri3");
       expect(await contract.totalSupply()).to.equal(3);
-      expect(await contract.ownerOf(2)).to.equal(user1.address);
+      expect(await contract.ownerOf(3)).to.equal(user1.address);
     });
 
     it("Should maintain total supply consistency with safeMint return value", async function () {
       const { contract, minter, user1 } = await loadFixture(deployHOENFTFixture);
       
       // Check that safeMint returns correct token ID
-      expect(await contract.connect(minter).safeMint.staticCall(user1.address, "ipfs://uri1")).to.equal(0);
+      expect(await contract.connect(minter).safeMint.staticCall(user1.address, "ipfs://uri1")).to.equal(1);
       await contract.connect(minter).safeMint(user1.address, "ipfs://uri1");
       expect(await contract.totalSupply()).to.equal(1);
       
-      expect(await contract.connect(minter).safeMint.staticCall(user1.address, "ipfs://uri2")).to.equal(1);
+      expect(await contract.connect(minter).safeMint.staticCall(user1.address, "ipfs://uri2")).to.equal(2);
       await contract.connect(minter).safeMint(user1.address, "ipfs://uri2");
       expect(await contract.totalSupply()).to.equal(2);
       
-      expect(await contract.connect(minter).safeMint.staticCall(user1.address, "ipfs://uri3")).to.equal(2);
+      expect(await contract.connect(minter).safeMint.staticCall(user1.address, "ipfs://uri3")).to.equal(3);
       await contract.connect(minter).safeMint(user1.address, "ipfs://uri3");
       expect(await contract.totalSupply()).to.equal(3);
     });
@@ -380,51 +380,51 @@ describe("HOENFT (HouseOfEmiratesNFTs)", function () {
     it("Should handle edge case: mint, burn, mint again", async function () {
       const { contract, minter, user1 } = await loadFixture(deployHOENFTFixture);
       
-      // Mint token 0
+      // Mint token 1
       await contract.connect(minter).safeMint(user1.address, "ipfs://uri1");
       expect(await contract.totalSupply()).to.equal(1);
       
-      // Burn token 0
-      await contract.connect(user1).burn(0);
+      // Burn token 1
+      await contract.connect(user1).burn(1);
       expect(await contract.totalSupply()).to.equal(1);
       
-      // Mint token 1 (next available ID)
+      // Mint token 2 (next available ID)
       await contract.connect(minter).safeMint(user1.address, "ipfs://uri2");
       expect(await contract.totalSupply()).to.equal(2);
-      expect(await contract.ownerOf(1)).to.equal(user1.address);
+      expect(await contract.ownerOf(2)).to.equal(user1.address);
       
-      // Token 0 should still be burned
-      await expect(contract.ownerOf(0)).to.be.revertedWithCustomError(contract, "ERC721NonexistentToken");
+      // Token 1 should still be burned
+      await expect(contract.ownerOf(1)).to.be.revertedWithCustomError(contract, "ERC721NonexistentToken");
     });
 
     it("Should maintain total supply accuracy in complex scenarios", async function () {
       const { contract, minter, user1, user2, user3 } = await loadFixture(deployHOENFTFixture);
       
       // Complex scenario: mint, transfer, burn, mint more
-      await contract.connect(minter).safeMint(user1.address, "ipfs://uri1"); // ID 0
-      await contract.connect(minter).safeMint(user1.address, "ipfs://uri2"); // ID 1
-      await contract.connect(minter).safeMint(user2.address, "ipfs://uri3"); // ID 2
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri1"); // ID 1
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri2"); // ID 2
+      await contract.connect(minter).safeMint(user2.address, "ipfs://uri3"); // ID 3
       expect(await contract.totalSupply()).to.equal(3);
       
-      // Transfer token 0 from user1 to user3
-      await contract.connect(user1).transferFrom(user1.address, user3.address, 0);
+      // Transfer token 1 from user1 to user3
+      await contract.connect(user1).transferFrom(user1.address, user3.address, 1);
       expect(await contract.totalSupply()).to.equal(3);
       
-      // Burn token 1
-      await contract.connect(user1).burn(1);
+      // Burn token 2
+      await contract.connect(user1).burn(2);
       expect(await contract.totalSupply()).to.equal(3);
       
       // Mint more tokens
-      await contract.connect(minter).safeMint(user2.address, "ipfs://uri4"); // ID 3
-      await contract.connect(minter).safeMint(user3.address, "ipfs://uri5"); // ID 4
+      await contract.connect(minter).safeMint(user2.address, "ipfs://uri4"); // ID 4
+      await contract.connect(minter).safeMint(user3.address, "ipfs://uri5"); // ID 5
       expect(await contract.totalSupply()).to.equal(5);
       
       // Verify ownership
-      expect(await contract.ownerOf(0)).to.equal(user3.address);
-      await expect(contract.ownerOf(1)).to.be.revertedWithCustomError(contract, "ERC721NonexistentToken");
-      expect(await contract.ownerOf(2)).to.equal(user2.address);
+      expect(await contract.ownerOf(1)).to.equal(user3.address);
+      await expect(contract.ownerOf(2)).to.be.revertedWithCustomError(contract, "ERC721NonexistentToken");
       expect(await contract.ownerOf(3)).to.equal(user2.address);
-      expect(await contract.ownerOf(4)).to.equal(user3.address);
+      expect(await contract.ownerOf(4)).to.equal(user2.address);
+      expect(await contract.ownerOf(5)).to.equal(user3.address);
     });
   });
 });
