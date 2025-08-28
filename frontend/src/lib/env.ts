@@ -10,9 +10,9 @@ export const ENV_CONFIG = {
       ethereum: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_MAINNET || '',
     },
     testnet: {
-      sepolia: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_SEPOLIA || '0x4aaA77E971fc35Df46493F37D732B05461C17d2A',
-      amoy: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_AMOY || '0x8040F5f215b76d619a6c4cBFc03c266258D96A19',
-      hardhat: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
+      sepolia: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_SEPOLIA || '',
+      amoy: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_AMOY || '',
+      hardhat: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_HARDHAT || '0x5FbDB2315678afecb367f032d93F642f64180aa3',
     }
   },
   
@@ -24,7 +24,7 @@ export const ENV_CONFIG = {
   
   // RPC URLs
   RPC_URLS: {
-    1: process.env.NEXT_PUBLIC_ETHEREUM_MAINNET_RPC_URL || 'https://eth-mainnet.g.alchemy.com/v2/demo',
+    1: process.env.NEXT_PUBLIC_ETHEREUM_MAINNET_RPC_URL || '',
     11155111: process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL || 'https://rpc.sepolia.org',
     80002: process.env.NEXT_PUBLIC_POLYGON_AMOY_RPC_URL || 'https://rpc-amoy.polygon.technology',
     31337: 'http://localhost:8545', // Hardhat local

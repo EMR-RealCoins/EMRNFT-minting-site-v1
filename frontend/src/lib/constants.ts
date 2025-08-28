@@ -3,7 +3,7 @@ export const NETWORKS = {
   mainnet: {
     id: 1,
     name: 'Ethereum Mainnet',
-    rpcUrl: process.env.NEXT_PUBLIC_ETHEREUM_MAINNET_RPC_URL || 'https://eth-mainnet.g.alchemy.com/v2/demo',
+    rpcUrl: process.env.NEXT_PUBLIC_ETHEREUM_MAINNET_RPC_URL || '',
     explorer: 'https://etherscan.io',
     currency: 'Ether',
     currencySymbol: 'ETH',
@@ -29,7 +29,7 @@ export const NETWORKS = {
 // Contract Addresses
 export const CONTRACT_ADDRESSES = {
   mainnet: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_MAINNET || '',
-  sepolia: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_SEPOLIA || '0x4aaA77E971fc35Df46493F37D732B05461C17d2A',
+  sepolia: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_SEPOLIA || '',
   amoy: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_AMOY || '',
 } as const;
 
