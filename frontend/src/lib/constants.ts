@@ -29,7 +29,7 @@ export const NETWORKS = {
 // Contract Addresses
 export const CONTRACT_ADDRESSES = {
   mainnet: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_MAINNET || '',
-  sepolia: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_SEPOLIA || '0xf397340552D0A4630975850fE4007D5d7426AdE9',
+  sepolia: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_SEPOLIA || '0x4aaA77E971fc35Df46493F37D732B05461C17d2A',
   amoy: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_AMOY || '',
 } as const;
 

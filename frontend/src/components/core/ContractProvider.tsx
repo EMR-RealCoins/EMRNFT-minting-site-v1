@@ -11,7 +11,7 @@ const HOE_NFT_ABI = [{"inputs":[{"internalType":"address","name":"defaultAdmin",
 const CONTRACT_ADDRESSES = {
   1: '0x0000000000000000000000000000000000000000', // Ethereum Mainnet (placeholder)
   80002: '0x8040F5f215b76d619a6c4cBFc03c266258D96A19', // Polygon Amoy Testnet
-  11155111: '0x6Ba9C70910DF2BC0eBFFc2Ec3418C67EF3a26cbF', // Sepolia Testnet
+  11155111: '0x4aaA77E971fc35Df46493F37D732B05461C17d2A', // Sepolia Testnet
   31337: '0x5FbDB2315678afecb367f032d93F642f64180aa3', // Hardhat Localhost
 } as const;
 
