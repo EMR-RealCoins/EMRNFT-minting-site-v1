@@ -212,6 +212,32 @@ describe("HOENFT (HouseOfEmiratesNFTs)", function () {
         .to.emit(contract, "ApprovalForAll")
         .withArgs(user1.address, user2.address, true);
     });
+
+    it("Should start token IDs from 1 (not 0)", async function () {
+      const { contract, minter, user1, user2 } = await loadFixture(deployHOENFTFixture);
+      
+      // First mint should return token ID 1
+      const firstTokenId = await contract.connect(minter).safeMint.staticCall(user1.address, "ipfs://uri1");
+      expect(firstTokenId).to.equal(1);
+      
+      // Verify the first minted token has ID 1
+      await contract.connect(minter).safeMint(user1.address, "ipfs://uri1");
+      expect(await contract.ownerOf(1)).to.equal(user1.address);
+      
+      // Second mint should return token ID 2
+      const secondTokenId = await contract.connect(minter).safeMint.staticCall(user2.address, "ipfs://uri2");
+      expect(secondTokenId).to.equal(2);
+      
+      // Verify the second minted token has ID 2
+      await contract.connect(minter).safeMint(user2.address, "ipfs://uri2");
+      expect(await contract.ownerOf(2)).to.equal(user2.address);
+      
+      // Verify that token ID 0 does not exist
+      await expect(contract.ownerOf(0)).to.be.revertedWithCustomError(contract, "ERC721NonexistentToken");
+      
+      // Total supply should be 2
+      expect(await contract.totalSupply()).to.equal(2);
+    });
   });
 
   describe("Access Control Security", function () {
