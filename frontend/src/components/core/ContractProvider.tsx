@@ -98,10 +98,9 @@ export function ContractProvider({ children }: ContractProviderProps) {
     },
   });
 
-  // Since we can't directly get role members from the standard AccessControl,
-  // we'll use the deployed contract's known admin address for now
-  // In a production environment, you might want to listen to RoleGranted events
-  const contractOwner = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266' as `0x${string}`; // Default admin from deployment
+  // For now, we'll use a placeholder for contract owner since AccessControl doesn't have getRoleMember
+  // In production, you might want to track this via events or store it in a mapping
+  const contractOwner = undefined;
   const isLoadingOwner = false;
 
   // Get contract name to help with total supply calculation
@@ -115,7 +114,7 @@ export function ContractProvider({ children }: ContractProviderProps) {
   });
 
   // Check if user has minter role
-  const { data: hasMinterRole, isLoading: isLoadingRole } = useReadContract({
+  const { data: hasMinterRole, isLoading: isLoadingRole, error: roleCheckError } = useReadContract({
     address: contractAddress,
     abi: HOE_NFT_ABI,
     functionName: 'hasRole',
@@ -124,6 +123,22 @@ export function ContractProvider({ children }: ContractProviderProps) {
       enabled: isContractReady && !!address && !!minterRoleHash,
     },
   });
+
+  // Debug logging for role checking
+  useEffect(() => {
+    if (roleCheckError) {
+      console.error('Role check error:', roleCheckError);
+    }
+    if (minterRoleHash) {
+      console.log('MINTER_ROLE hash:', minterRoleHash);
+    }
+    if (address) {
+      console.log('User address:', address);
+    }
+    if (hasMinterRole !== undefined) {
+      console.log('User has minter role:', hasMinterRole);
+    }
+  }, [roleCheckError, minterRoleHash, address, hasMinterRole]);
   
   // Minting transaction
   const { writeContract, data: mintTransactionHash, isPending: isMinting, error: mintError, reset: resetMintTransaction } = useWriteContract();
@@ -196,7 +211,7 @@ export function ContractProvider({ children }: ContractProviderProps) {
   const contextValue: ContractContextType = {
     contractAddress,
     isContractReady,
-    contractOwner,
+    contractOwner: contractOwner as `0x${string}` | undefined,
     totalSupply,
     isLoadingContractInfo: isLoadingOwner || isLoadingTotalSupply,
     hasMinterRole: hasMinterRole || false,

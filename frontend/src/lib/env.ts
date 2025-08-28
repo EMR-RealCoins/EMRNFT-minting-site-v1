@@ -10,7 +10,7 @@ export const ENV_CONFIG = {
       ethereum: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_MAINNET || '',
     },
     testnet: {
-      sepolia: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_SEPOLIA || '0x6Ba9C70910DF2BC0eBFFc2Ec3418C67EF3a26cbF',
+      sepolia: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_SEPOLIA || '0x4aaA77E971fc35Df46493F37D732B05461C17d2A',
       amoy: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_AMOY || '0x8040F5f215b76d619a6c4cBFc03c266258D96A19',
       hardhat: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
     }
